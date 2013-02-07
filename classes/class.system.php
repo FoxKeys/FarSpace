@@ -6,9 +6,40 @@
 	 */
 	class system extends DB {
 		/**
+		 * @var starClass
+		 */
+		private $starClass = null;
+		/**
+		 * @var int
+		 */
+		private $starSubclass = 0;
+
+		/**
 		 * @return planet[]
 		 */
-		public function planets(){
+		public function planets() {
 			return array();
+		}
+
+		/**
+		 * @param null|starClass $starClass
+		 * @return null|starClass
+		 */
+		public function starClass( $starClass = null ) {
+			if ( isset( $starClass ) ) {
+				$this->starClass = $starClass;
+			}
+			return $this->starClass;
+		}
+
+		/**
+		 * @param null|int $starSubclass
+		 * @return int
+		 */
+		public function starSubclass( $starSubclass = null ) {
+			if ( isset( $starSubclass ) ) {
+				$this->starSubclass = $starSubclass;
+			}
+			return $this->starSubclass;
 		}
 	}

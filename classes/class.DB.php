@@ -4,12 +4,12 @@
 	 * Author: Fox
 	 * Date Time: 09.12.2011 15:01
 	 */
-	class DB {
+	abstract class DB {
 
 		/**
 		 * @var FoxDB $DB
 		 */
-		protected $DB;
+		protected $DB = null;
 
 		/**
 		 * @param FoxDB $DB
@@ -18,4 +18,25 @@
 			$this->DB = $DB;
 		}
 
+		/**
+		 * @return FoxDB|null
+		 */
+		public function DB() {
+			return $this->DB;
+		}
+
+		/**
+		 * @param array $data
+		 * @return \DB
+		 */
+		public function assignArray( $data ) {
+			foreach ( $data as $key => $value ) {
+				if ( method_exists( $this, $key ) ) {
+					$this->$key( $value );
+				}
+			}
+			return $this;
+		}
+
+		abstract public function save();
 	}

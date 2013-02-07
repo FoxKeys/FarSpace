@@ -21,13 +21,26 @@
 		 * chance of being selected.  Also note that weights should be integers.
 		 *
 		 * @param array $weightedValues
+		 * @param null|string $weightField
 		 * @return mixed
 		 */
-		function getRandomWeightedElement( array $weightedValues ) {
-			$rand = mt_rand( 1, (int)array_sum( $weightedValues ) );
+		public static function getRandomWeightedElement( array $weightedValues, $weightField = null ) {
+			if ( !isset( $weightField ) ) {
+				$sum = (int)array_sum( $weightedValues );
+			} else {
+				$sum = 0;
+				foreach ( $weightedValues as $value ) {
+					$sum += $value[$weightField];
+				}
+			}
+			$rand = mt_rand( 1, $sum );
 			$result = null;
 			foreach ( $weightedValues as $key => $value ) {
-				$rand -= $value;
+				if ( !isset( $weightField ) ) {
+					$rand -= $value;
+				} else {
+					$rand -= $value[$weightField];
+				}
 				if ( $rand <= 0 ) {
 					$result = $key;
 					break;

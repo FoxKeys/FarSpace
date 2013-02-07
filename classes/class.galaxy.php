@@ -6,53 +6,21 @@
 	 */
 
 	class galaxy extends DB {
+		CONST GALAXIES_TABLE = 'galaxies';
 		private $forums = array( "PUBLIC" => 112, "NEWS" => 112 );
+		private $idGalaxy = 0;
 		/**
 		 * @var int
 		 */
-		private $centerX;
-		private $centerY;
-		private $radius;
-		private $centerWeight;
-		private $systems;
-		private $startingPos;
-		private $numOfStartPos;
-		private $timeEnabled;
-		private $timeStopped;
-		private $creationTime;
-		private $imperator;
-		private $description;
-		private $emrLevel;
-		private $emrTrend;
-		private $emrTime;
-
-		public function init( $obj ) {
-			#
-			$this->centerX = 0.0;
-			$this->centerY = 0.0;
-			$this->radius = 0.0;
-			$this->centerWeight = 250.0;
-			$this->systems = array();
-			$this->startingPos = array();
-			$this->numOfStartPos = 0;
-			$this->timeEnabled = 0; # TODO change to 0
-			$this->timeStopped = 0;
-			$this->creationTime = 0.0;
-			$this->imperator = fConst::OID_NONE;
-			$this->description = "";
-			# electromagnetic radiation
-			$this->emrLevel = 1.0;
-			$this->emrTrend = 1.0;
-			$this->emrTime = 0;
-		}
-
-		private function update( $tran, $obj ) {
-			throw new Exception( sprintf( fConst::E_NOT_TRANSLATED, __METHOD__ ) );
-		}
-
-		private function getReferences( $tran, $obj ) {
-			return $obj->systems;
-		}
+		private $centerX = 500;
+		/**
+		 * @var int
+		 */
+		private $centerY = 50;
+		/**
+		 * @var int
+		 */
+		private $radius = 500;
 
 		/**
 		 * @param $centerX
@@ -85,6 +53,20 @@
 				$this->radius = $radius;
 			}
 			return $this->radius;
+		}
+
+		public function save() {
+			//ToDo: Check rights
+			if(!isset($this->idGalaxy)){
+				$this->DB()->exec('INSERT INTO ' . $this::GALAXIES_TABLE . ' (idUniverse) VALUES (?)',
+					$this->idUniverse()
+				);
+			} else {
+				$this->DB()->exec('UPDATE ' . $this::GALAXIES_TABLE . ' SET emrLevel = ? WHERE idGalaxy = ?',
+					$this->emrLevel(),
+					$this->idGalaxy()
+				);
+			}
 		}
 
 	}

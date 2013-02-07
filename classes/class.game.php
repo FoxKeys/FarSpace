@@ -43,10 +43,10 @@
 		 * @return starClasses
 		 */
 		public static function starClasses(){
-			static $galaxyGenerator;
-			if ( empty( $galaxyGenerator ) ){
-				$galaxyGenerator = new galaxyGenerator( self::DB() );
+			static $starClasses;
+			if ( empty( $starClasses ) ){
+				$starClasses = new starClasses( self::DB() );
 			}
-			return $galaxyGenerator;
+			return $starClasses;
 		}
 	}

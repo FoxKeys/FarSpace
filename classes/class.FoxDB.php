@@ -32,7 +32,7 @@
 		}
 
 		public function select( $query ) { // ( $query, *$args )
-
+			//echo $query;
 			$args = func_get_args();
 			array_shift( $args );
 			$stmt = $this->prepare( $query );

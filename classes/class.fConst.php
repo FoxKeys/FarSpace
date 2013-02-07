@@ -10,6 +10,7 @@
 	class fConst {
 		CONST E_NOT_TRANSLATED = 'Function %s not yet translated from Python';
 		CONST E_NOT_IMPLEMENTED = 'Function %s not yet implemented';
+		CONST E_NOT_FOUND = 'Object %s with id="%s" not found';
 		## additional object types
 		CONST T_GALAXY = 100;
 

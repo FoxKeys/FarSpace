@@ -6,6 +6,8 @@
 	 */
 
 	class galaxyTemplate extends DB {
+		const TABLE_NAME = 'galaxyTemplates';
+		const DENSITY_TABLE_NAME = 'galaxyTemplatesDensity';
 		/**
 		 * @var int
 		 */
@@ -29,10 +31,20 @@
 
 		/**
 		 * @param int $idGalaxyTemplate
+		 * @throws Exception
+		 * @return \galaxyTemplate
 		 */
 		public function load( $idGalaxyTemplate ) {
-			throw new Exception( sprintf( fConst::E_NOT_IMPLEMENTED, __METHOD__ ) );
-			return $this;
+			$data = $this->DB()->selectRow( 'SELECT * FROM ' . self::TABLE_NAME . ' WHERE idGalaxyTemplate = ?', $idGalaxyTemplate );
+			if ( empty( $data ) ) {
+				throw new Exception( sprintf( fConst::E_NOT_FOUND, __CLASS__, $idGalaxyTemplate ) );
+			}
+			$density = $this->DB()->select( 'SELECT * FROM ' . self::DENSITY_TABLE_NAME . ' WHERE idGalaxyTemplate = ?', $idGalaxyTemplate );
+			if ( empty( $density ) ) {
+				throw new Exception( sprintf( 'Density data not found for galaxy template with id="%d"', $idGalaxyTemplate ) );
+			}
+			$this->assignArray( $data );
+			$this->galaxyDensity( $density );
 		}
 
 		/**
@@ -74,9 +86,9 @@
 		 */
 		public function galaxyMinR( $galaxyMinR = null ) {
 			if ( isset( $galaxyMinR ) ) {
-				$this->$galaxyMinR = $galaxyMinR;
+				$this->galaxyMinR = $galaxyMinR;
 			}
-			return $this->$galaxyMinR;
+			return $this->galaxyMinR;
 		}
 
 		/**
@@ -85,8 +97,8 @@
 		 */
 		public function galaxyDensity( $galaxyDensity = null ) {
 			if ( isset( $galaxyDensity ) ) {
-				$this->$galaxyDensity = $galaxyDensity;
+				$this->galaxyDensity = $galaxyDensity;
 			}
-			return $this->$galaxyDensity;
+			return $this->galaxyDensity;
 		}
 	}
