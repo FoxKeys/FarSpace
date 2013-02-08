@@ -1,23 +1,36 @@
 <?php
-/**
- * Created by JetBrains PhpStorm.
- * Author: Fox foxkeys@gmail.com
- * Date Time: 06.02.2013 3:26
- */
+	/**
+	 * Created by JetBrains PhpStorm.
+	 * Author: Fox foxkeys@gmail.com
+	 * Date Time: 06.02.2013 3:26
+	 */
 	class auth extends DB {
+		public function load( $idUniverse ) {
+			throw new Exception( sprintf( fConst::E_NOT_IMPLEMENTED, __METHOD__ ) );
+		}
+
+		public function save() {
+			throw new Exception( sprintf( fConst::E_NOT_IMPLEMENTED, __METHOD__ ) );
+		}
+
 		/**
-		 * @var player null
+		 * @var user null
 		 */
-		private static $currentPlayer = null;
+		private static $currentUser = null;
 
 		/**
 		 * @throws Exception
-		 * @return player
+		 * @return user
 		 */
-		public function currentPlayer(){
-			if ( empty( self::$currentPlayer ) ){
+		public function currentUser() {
+			$user = new user( $this->DB() );
+			$user->galaxyCreateLimit(1);
+			return $user;
+			//ToDo
+			/*if ( empty( self::$currentUser ) ) {
 				throw new Exception( 'Current player is not defined. Probable you are not logged in.' );
 			}
-			return self::$currentPlayer;
+			return self::$currentUser;
+			*/
 		}
 	}

@@ -13,7 +13,10 @@
 			throw new Exception( sprintf( fConst::E_NOT_TRANSLATED, __METHOD__ ) );
 		}
 
-		public static function message() {
-			throw new Exception( sprintf( fConst::E_NOT_TRANSLATED, __METHOD__ ) );
+		/**
+		 * @param string $message
+		 */
+		public static function message( $message ) {
+			echo $message . '<br/>' . PHP_EOL;
 		}
 	}

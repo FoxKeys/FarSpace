@@ -6,6 +6,11 @@
  */
 
 	class game {
+
+		public static function init(){
+			self::auth()->login();
+		}
+
 		/**
 		 * @return FoxDB
 		 */
@@ -29,17 +34,6 @@
 		}
 
 		/**
-		 * @return galaxyGenerator
-		 */
-		public static function galaxyGenerator(){
-			static $galaxyGenerator;
-			if ( empty( $galaxyGenerator ) ){
-				$galaxyGenerator = new galaxyGenerator( self::DB() );
-			}
-			return $galaxyGenerator;
-		}
-
-		/**
 		 * @return starClasses
 		 */
 		public static function starClasses(){
@@ -48,5 +42,16 @@
 				$starClasses = new starClasses( self::DB() );
 			}
 			return $starClasses;
+		}
+
+		/**
+		 * @return universe
+		 */
+		public static function universe(){
+			static $idUniverse;
+			if ( empty( $idUniverse ) ){
+				$idUniverse = 0;
+			}
+			return $idUniverse;
 		}
 	}

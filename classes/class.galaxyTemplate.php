@@ -8,26 +8,6 @@
 	class galaxyTemplate extends DB {
 		const TABLE_NAME = 'galaxyTemplates';
 		const DENSITY_TABLE_NAME = 'galaxyTemplatesDensity';
-		/**
-		 * @var int
-		 */
-		private $centerX = 500;
-		/**
-		 * @var int
-		 */
-		private $centerY = 500;
-		/**
-		 * @var int
-		 */
-		private $radius = 500;
-		/**
-		 * @var int
-		 */
-		private $galaxyMinR = 75;
-		/**
-		 * @var array
-		 */
-		private $galaxyDensity = array(0 => 3);
 
 		/**
 		 * @param int $idGalaxyTemplate
@@ -45,6 +25,14 @@
 			}
 			$this->assignArray( $data );
 			$this->galaxyDensity( $density );
+		}
+
+		/**
+		 * @throws Exception
+		 * @return \galaxyTemplate
+		 */
+		public function save() {
+			throw new Exception( sprintf( fConst::E_NOT_IMPLEMENTED, __METHOD__ ) );
 		}
 
 		/**

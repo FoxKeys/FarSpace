@@ -8,14 +8,15 @@
 	define( 'FS_SERVER_ADDR_LOCAL', 'localhost:' . FS_SERVER_PORT );
 
 	class fConst {
-		CONST E_NOT_TRANSLATED = 'Function %s not yet translated from Python';
-		CONST E_NOT_IMPLEMENTED = 'Function %s not yet implemented';
-		CONST E_NOT_FOUND = 'Object %s with id="%s" not found';
+		const E_NOT_TRANSLATED = 'Function %s not yet translated from Python';
+		const E_NOT_IMPLEMENTED = 'Function %s not yet implemented';
+		const E_PARTIALLY_IMPLEMENTED = 'Function %s not fully implemented';
+		const E_NOT_FOUND = 'Object %s with id="%s" not found';
 		## additional object types
-		CONST T_GALAXY = 100;
+		const T_GALAXY = 100;
 
 		# reserved OIDs
-		CONST OID_NONE = 0;
-		CONST SERVER_PORT = FS_SERVER_PORT;
-		CONST SERVER_ADDR_LOCAL = FS_SERVER_ADDR_LOCAL;
+		const OID_NONE = 0;
+		const SERVER_PORT = FS_SERVER_PORT;
+		const SERVER_ADDR_LOCAL = FS_SERVER_ADDR_LOCAL;
 	}
