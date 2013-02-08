@@ -6,80 +6,74 @@
 	 */
 
 	class starClass extends DB {
-		/**
-		 * @var string
-		 */
-		private $idStarClass = '';
-		/**
-		 * @var string
-		 */
-		private $starType = '';
-		/**
-		 * @var string
-		 */
-		private $starClass = '';
-		/**
-		 * @var int
-		 */
-		private $subclassChanceMin = 0;
-		/**
-		 * @var int
-		 */
-		private $subclassChanceMax = 0;
+		const TABLE_NAME = 'starClasses';
 
 		/**
-		 * @param $idStarClass
-		 * @return string
+		 * Stub to prevent starClass() method execution as constructor
+		 * @param FoxDB $DB
 		 */
-		public function idStarClass( $idStarClass = null ) {
-			if ( isset( $idStarClass ) ) {
-				$this->idStarClass = $idStarClass;
-			}
-			return $this->idStarClass;
+		public function __construct( $DB ) {
+			parent::__construct( $DB );
 		}
 
 		/**
-		 * @param $starType
+		 * @param FoxDB $DB
+		 * @return starClass[]
+		 */
+		public static function selectAll( $DB ){
+			$data = $DB->select( 'SELECT * FROM ' . self::TABLE_NAME );
+			foreach($data as $key => $starClassData){
+				$data[$key] = starClass::createFromArray( $starClassData, $DB );
+			}
+			return $data;
+		}
+
+		/**
+		 * Type Hint wrapper
 		 * @return string
 		 */
-		public function starType( $starType = null ) {
-			if ( isset( $starType ) ) {
-				$this->starType = $starType;
-			}
-			return $this->starType;
+		public function idStarClass( ) {
+			return $this->fieldGet( __METHOD__ );
+		}
+
+		/**
+		 * Type Hint wrapper
+		 * @return string
+		 */
+		public function starType( ) {
+			return $this->fieldGet( __METHOD__ );
 		}
 		
 		/**
-		 * @param $starClass
+		 * Type Hint wrapper
 		 * @return string
 		 */
-		public function starClass( $starClass = null ) {
-			if ( isset( $starClass ) ) {
-				$this->starClass = $starClass;
-			}
-			return $this->starClass;
-		}
-		
-		/**
-		 * @param $subclassChanceMin
-		 * @return int
-		 */
-		public function subclassChanceMin( $subclassChanceMin = null ) {
-			if ( isset( $subclassChanceMin ) ) {
-				$this->subclassChanceMin = $subclassChanceMin;
-			}
-			return $this->subclassChanceMin;
+		public function starClass( ) {
+			return $this->fieldGet( __METHOD__ );
 		}
 
 		/**
-		 * @param $subclassChanceMax
+		 * Type Hint wrapper
 		 * @return int
 		 */
-		public function subclassChanceMax( $subclassChanceMax = null ) {
-			if ( isset( $subclassChanceMax ) ) {
-				$this->subclassChanceMax = $subclassChanceMax;
-			}
-			return $this->subclassChanceMax;
+		public function chance( ) {
+			return $this->fieldGet( __METHOD__ );
+		}
+
+		/**
+		 * Type Hint wrapper
+		 * @return int
+		 */
+		public function subclassChanceMin( ) {
+			return $this->fieldGet( __METHOD__ );
+		}
+
+		/**
+		 * Type Hint wrapper
+		 * @return int
+		 */
+		public function subclassChanceMax( ) {
+			return $this->fieldGet( __METHOD__ );
 		}
 
 	}

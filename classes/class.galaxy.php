@@ -7,22 +7,27 @@
 
 	class galaxy extends DB {
 		const GALAXIES_TABLE = 'galaxies';
-		const CANT_CREATE_MORE = 'You can\'t create more galaxies.';
+		const CANT_CREATE_MORE = 'You can\'t createFromDB more galaxies.';
 
+		/**
+		 * @throws Exception
+		 * @return galaxy
+		 */
 		public function save() {
-			if ( !$this->propIsSet( 'idGalaxy' ) ) {
+			if ( !$this->fieldIsSet( 'idGalaxy' ) ) {
 				$currentUser = game::auth()->currentUser();
 				if ( $currentUser->galaxyCreateLimit() > 0 ) {
 					$this->DB()->exec(
-						'INSERT INTO ' . $this::GALAXIES_TABLE . ' ( idUniverse, name, description, centerX, centerY, radius ) VALUES (?, ?, ?, ?, ?, ?)',
+						'INSERT INTO ' . $this::GALAXIES_TABLE . ' ( idUniverse, idUser, name, description, centerX, centerY, radius ) VALUES (?, ?, ?, ?, ?, ?, ?)',
 						$this->idUniverse(),
+						$this->idUser(),
 						$this->name(),
 						$this->description(),
 						$this->centerX(),
 						$this->centerY(),
 						$this->radius()
 					);
-					$this->set( 'idGalaxy', $this->DB()->lastInsertId() );
+					$this->idGalaxy( $this->DB()->lastInsertId() );
 					$currentUser->galaxyCreateLimit( $currentUser->galaxyCreateLimit() - 1 );
 					$currentUser->save();
 				} else {
@@ -36,65 +41,98 @@
 					$this->idGalaxy()
 				);*/
 			}
+			return $this;
 		}
 
-		public function load( $idUniverse ) {
+		/**
+		 * @param int $idGalaxy
+		 * @throws Exception
+		 * @return galaxy
+		 */
+		public function load( $idGalaxy ) {
 			throw new Exception( sprintf( fConst::E_NOT_IMPLEMENTED, __METHOD__ ) );
 		}
 
 		/**
-		 * @return int
+		 * Type Hint wrapper
+		 * @param int $idGalaxy
+		 * @param FoxDB $DB
+		 * @return galaxy
 		 */
-		public function idGalaxy( ) {
-			return $this->get( __METHOD__ );
+		public static function createFromDB( $idGalaxy, $DB ) {
+			return parent::createFromDB( $idGalaxy, $DB );
 		}
 
 		/**
+		 * Type Hint wrapper
+		 * @param int $idGalaxy
+		 * @return int
+		 */
+		public function idGalaxy( $idGalaxy = null ) {
+			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
+		}
+
+		/**
+		 * Type Hint wrapper
 		 * @param int $idUniverse
 		 * @return int
 		 */
 		public function idUniverse( $idUniverse = null ) {
-			return call_user_func_array( array( $this, 'getSet' ), array( 1 => __METHOD__ ) + func_get_args() );
+			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
 		}
 
 		/**
+		 * Type Hint wrapper
+		 * @param int $idUser
+		 * @return int
+		 */
+		public function idUser( $idUser = null ) {
+			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
+		}
+
+		/**
+		 * Type Hint wrapper
 		 * @param $centerX
 		 * @return int
 		 */
 		public function centerX( $centerX = null ) {
-			return call_user_func_array( array( $this, 'getSet' ), array( 1 => __METHOD__ ) + func_get_args() );
+			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
 		}
 
 		/**
+		 * Type Hint wrapper
 		 * @param $centerY
 		 * @return int
 		 */
 		public function centerY( $centerY = null ) {
-			return call_user_func_array( array( $this, 'getSet' ), array( 1 => __METHOD__ ) + func_get_args() );
+			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
 		}
 
 		/**
+		 * Type Hint wrapper
 		 * @param $radius
 		 * @return int
 		 */
 		public function radius( $radius = null ) {
-			return call_user_func_array( array( $this, 'getSet' ), array( 1 => __METHOD__ ) + func_get_args() );
+			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
 		}
 
 		/**
+		 * Type Hint wrapper
 		 * @param string $name
 		 * @return string
 		 */
 		public function name( $name = null ) {
-			return call_user_func_array( array( $this, 'getSet' ), array( 1 => __METHOD__ ) + func_get_args() );
+			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
 		}
 		
 		/**
+		 * Type Hint wrapper
 		 * @param string $description
 		 * @return string
 		 */
 		public function description( $description = null ) {
-			return call_user_func_array( array( $this, 'getSet' ), array( 1 => __METHOD__ ) + func_get_args() );
+			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
 		}
 
 	}

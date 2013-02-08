@@ -31,6 +31,34 @@
 		}
 
 		/**
+		 * @param $idObject
+		 * @param FoxDB $DB
+		 * @return DB
+		 */
+		public static function createFromDB( $idObject, $DB ) {
+			$class = get_called_class();
+			/**
+			 * @var DB $instance
+			 */
+			$instance = new $class( $DB );
+			return $instance->load( $idObject );
+		}
+
+		/**
+		 * @param mixed[] $data
+		 * @param FoxDB $DB
+		 * @return DB
+		 */
+		public static function createFromArray( $data, $DB ) {
+			$class = get_called_class();
+			/**
+			 * @var DB $instance
+			 */
+			$instance = new $class( $DB );
+			return $instance->assignArray( $data );
+		}
+
+		/**
 		 * @param array $data
 		 * @return \DB
 		 */
@@ -40,26 +68,37 @@
 					$ReflectionMethod = new ReflectionMethod( $this, $key );
 					if ( $ReflectionMethod->getNumberOfParameters() == 1 ) {
 						$this->$key( $value );
+						continue;
 					}
 				}
+				$this->fieldSet( $key, $value );
 			}
 			return $this;
 		}
 
-		abstract public function save();
+		/**
+		 * @throws Exception
+		 * @return mixed
+		 */
+		public function save(){
+			throw new Exception( sprintf( fConst::E_NOT_IMPLEMENTED, __METHOD__ ) );
+		}
 
 		/**
 		 * @param mixed $idObject
+		 * @throws Exception
 		 * @return mixed
 		 */
-		abstract public function load( $idObject );
+		public function load( $idObject ){
+			throw new Exception( sprintf( fConst::E_NOT_IMPLEMENTED, __METHOD__ ) );
+		}
 
 		/**
 		 * @param string $name
 		 * @return mixed
 		 * @throws Exception
 		 */
-		protected function get( $name ) {
+		protected function fieldGet( $name ) {
 			if ( !array_key_exists( $name, $this->data ) ) {
 				throw new Exception( sprintf( self::E_PROPERTY_NOT_SET, $name ) );
 			}
@@ -71,7 +110,7 @@
 		 * @param mixed $value
 		 * @return \DB
 		 */
-		protected function set( $name, $value ) {
+		protected function fieldSet( $name, $value ) {
 			$this->data[get_class( $this ) . '::' . $name] = $value;
 			return $this;
 		}
@@ -82,7 +121,7 @@
 		 * @throws Exception
 		 * @return mixed
 		 */
-		protected function getSet( $name, $value = null ) {
+		protected function fieldGetSet( $name, $value = null ) {
 			$args = func_get_args();
 			if ( count( $args ) > 1 ) {
 				$this->data[$name] = $value;
@@ -97,7 +136,7 @@
 		 * @param string $name
 		 * @return bool
 		 */
-		public function propIsSet( $name ) {
+		public function fieldIsSet( $name ) {
 			return array_key_exists( get_class( $this ) . '::' . $name, $this->data );
 		}
 

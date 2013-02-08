@@ -9,6 +9,16 @@
 		const UNIVERSES_TABLE_NAME = 'universes';
 
 		/**
+		 * Type Hint wrapper
+		 * @param int $idUniverse
+		 * @param FoxDB $DB
+		 * @return universe
+		 */
+		public static function createFromDB( $idUniverse, $DB ) {
+			return parent::createFromDB( $idUniverse, $DB );
+		}
+
+		/**
 		 * @param int $idUniverse
 		 * @return universe
 		 * @throws Exception
@@ -18,7 +28,7 @@
 			if ( empty( $data ) ) {
 				throw new Exception( sprintf( fConst::E_NOT_FOUND, __CLASS__, $idUniverse ) );
 			}
-			return $this->assignArray( $data )->set( 'idUniverse', $data['idUniverse'] );
+			return $this->assignArray( $data );
 		}
 
 		/**
@@ -30,10 +40,12 @@
 		}
 
 		/**
+		 * Type Hint wrapper
+		 * @param int $idUniverse
 		 * @return int
 		 */
-		public function idUniverse( ) {
-			return $this->get( __METHOD__ );
+		public function idUniverse( $idUniverse = null ) {
+			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
 		}
 
 		/**
@@ -56,6 +68,7 @@
 
 					$galaxy = new galaxy( $this->DB() );
 					$galaxy->idUniverse( $this->idUniverse() );
+					$galaxy->idUser( game::auth()->currentUser()->idUser() );
 					$galaxy->centerX( $x );
 					$galaxy->centerY( $y );
 					$galaxy->radius( $radius );
@@ -64,13 +77,13 @@
 					$galaxy->save();
 
 					$r = $galaxyTemplate->galaxyMinR() + rand( 0, 5 );
-					$galaxyDensity = $galaxyTemplate->galaxyDensity();
+					$galaxyDensityList = galaxyDensity::selectByGalaxyTemplate( $galaxyTemplate->idGalaxyTemplate(), $this->DB() );
 					$prevR = 50;
 					$density = 3;
-					/*while ( $r <= $galaxyTemplate->radius() ) {
-						foreach ( $galaxyDensity as $radius => $newDensity ) {
-							if ( $newDensity['radius'] <= $r ) {
-								$density = $newDensity['density'];
+					while ( $r <= $galaxyTemplate->radius() ) {
+						foreach ( $galaxyDensityList as $galaxyDensity ) {
+							if ( $galaxyDensity->radius() <= $r ) {
+								$density = $galaxyDensity->density();
 							} else {
 								break;
 							}
@@ -82,36 +95,407 @@
 							$angle = $aoff + $i * $density / $d * pi() * 2;
 							$angle += utils::randomFloat( -$dangle, $dangle );
 							$tr = rand( $prevR + 1, $r );
-							while ( true ) {
-								$acceptable = false;
+							$acceptable = false;
+							while ( !$acceptable ) {
 								$system = new system( $this->DB() );
-								$system->idGalaxy = $galaxy->idGalaxy();
-								$this->generateSystem( $system );
+								$planets = $this->generateSystem( $system );
 								# check requirements
-								foreach ( $system->planets() as $planet ) {
-									if ( in_array( $planet->type()->idPlanetType(), array( 'D', 'R', 'C', 'H', 'M', 'E' ) ) and $planet->slots() > 0 ) {
+								foreach ( $planets as $planet ) {
+									if ( in_array( $planet->idPlanetType(), array( 'D', 'R', 'C', 'H', 'M', 'E' ) ) and $planet->plSlots() > 0 ) {
 										$acceptable = true;
 										break;
 									}
 								}
-								if ( $acceptable ) {
+								if($acceptable){
+									$system->idGalaxy( $galaxy->idGalaxy() );
+									$system->x( cos( $angle ) * $tr + $galaxy->centerX() );
+									$system->y( sin( $angle ) * $tr + $galaxy->centerY() );
 									$system->save();
-									break;
+									foreach ( $planets as $planet ) {
+										$planet->idSystem( $system->idSystem() );
+										$planet->save();
+									}
 								}
 							}
 						}
 						$prevR = $r;
 						$r += rand( 20, 40 );
-					}*/
-					//ToDo - $this->DB()->commit();
+						# generate central black hole
+						$system = new system( $this->DB() );
+						$system->x( $galaxy->centerX() );
+						$system->y( $galaxy->centerY() );
+						$system->idStarClass( "b-" );
+						$system->starSubclass( 7 );
+						$system->idGalaxy( $galaxy->idGalaxy() );
+						//system._moveable = 0
+
+	/*# generate starting systems
+	if galaxyPlayers:
+		r = (galaxyStartR[0] + galaxyStartR[1]) / 2
+		d = 2 * math.pi * r
+		print "Player distance:", d / galaxyPlayers
+		gaoff = random.uniform(0, math.pi * 2)
+		for i in range(0, galaxyPlayers / galaxyPlayerGroup):
+			print "Placing group:", i + 1, "of", galaxyPlayers / galaxyPlayerGroup
+			angle = gaoff + i * math.pi * 2 / (galaxyPlayers / galaxyPlayerGroup)
+			tr = random.uniform(galaxyStartR[0], galaxyStartR[1])
+			gx = math.cos(angle) * tr + galaxyCenter[0]
+			gy = math.sin(angle) * tr + galaxyCenter[1]
+			aoff = random.uniform(0, math.pi * 2)
+			for j in range(0, galaxyPlayerGroup):
+				angle = aoff + j * math.pi * 2 / galaxyPlayerGroup
+				x = math.cos(angle) * galaxyGroupDist + gx
+				y = math.sin(angle) * galaxyGroupDist + gy
+				while 1:
+					system = System()
+					system.x = x
+					system.y = y
+					system.compOf = galaxy
+					generateSystem(system)
+					# check system properties
+					e = 0
+					h = 0
+					d = 0
+					ok = 1
+					for planet in system.planets:
+						if planet.type == 'E': e += 1; planet.starting = 1
+						elif planet.type in ('D', 'R', 'C'):
+							if planet.slots > 5: d += 1
+							else: ok = 0; break
+						elif planet.type == 'H': h += 1
+						elif planet.type == 'M': ok = 0; break
+					# fast rule
+					#if ok and e == 1:
+					#	break
+					# slow (better) rule
+					if ok and e == 1 and h == 1 and d == 1:
+						break
+				galaxy.systems.append(system)
+	# strategic resources
+	keys = galaxyResources.keys()
+	keys.sort()
+	keys.reverse()
+	for key in keys:
+		print "Placing resource", key
+		minR, maxR, count = galaxyResources[key]
+		aoff = random.uniform(0, math.pi * 2)
+		for i in range(0, count):
+			angle = aoff + i * math.pi * 2 / count
+			tr = random.uniform(minR, maxR)
+			x = math.cos(angle) * tr + galaxyCenter[0]
+			y = math.sin(angle) * tr + galaxyCenter[1]
+			# find closest system
+			closest = galaxy.systems[0]
+			minDist = 99999 #(closest.x - x) ** 2 + (closest.y - y) ** 2
+			for system in galaxy.systems:
+				dist = (system.x - x) ** 2 + (system.y - y) ** 2
+				if dist < minDist and system.hasSR == 0:
+					hasDRC = 0
+					starting = 0
+					# find suitable planet
+					for planet in system.planets:
+						if planet.starting:
+							starting = 1
+						if planet.type in ("D", "R", "C"):
+							hasDRC = 1
+					if not starting and hasDRC:
+						minDist = dist
+						closest = system
+			print "	System", closest.x, closest.y, math.sqrt(minDist)
+			# find planet on the closest system
+			planets = []
+			for planet in closest.planets:
+				if planet.type in ("D", "R", "C"):
+					planets.append(planet)
+			planet = random.choice(planets)
+			planet.strategicRes = key
+			system = planet.compOf
+			system.hasSR = 1
+			print "	Planet", planet.type
+	# diseases
+	keys = galaxyDiseases.keys()
+	keys.sort()
+	keys.reverse()
+	for key in keys:
+		print "Placing disease", key
+		minR, maxR, count = galaxyDiseases[key]
+		aoff = random.uniform(0, math.pi * 2)
+		for i in range(0, count):
+			angle = aoff + i * math.pi * 2 / count
+			tr = random.uniform(minR, maxR)
+			x = math.cos(angle) * tr + galaxyCenter[0]
+			y = math.sin(angle) * tr + galaxyCenter[1]
+			# find closest system
+			closest = galaxy.systems[0]
+			minDist = 99999 #(closest.x - x) ** 2 + (closest.y - y) ** 2
+			for system in galaxy.systems:
+				dist = (system.x - x) ** 2 + (system.y - y) ** 2
+				if dist < minDist and system.hasDisease == 0:
+					hasHME = 0
+					starting = 0
+					# find suitable planet
+					for planet in system.planets:
+						if planet.starting:
+							starting = 1
+						if planet.type in ("M", "E"):
+							hasHME = 1
+					if not starting and hasHME:
+						minDist = dist
+						closest = system
+			print "	System", closest.x, closest.y, math.sqrt(minDist)
+			# find planet on the closest system
+			planets = []
+			for planet in closest.planets:
+				if planet.type in ("M", "E"):
+					planets.append(planet)
+			planet = random.choice(planets)
+			planet.disease = key
+			system = planet.compOf
+			system.hasDisease = 1
+			print "	Planet", planet.type*/
+					}
+					$this->DB()->commit();
 				} catch ( Exception $e ) {
 					$this->DB()->rollBack();
 					throw $e;
 				}
 			} else {
-				throw new Exception( 'You can\'t create more galaxies.' );
+				throw new Exception( 'You can\'t createFromDB more galaxies.' );
 			}
 		}
 
+		/**
+		 * @param system $system
+		 * @return planet[]
+		 */
+		public function generateSystem( $system ) {
+			$result = array();
+			$starClasses = game::starClasses();
+			$starClass = $starClasses[utils::getRandomWeightedElement( $starClasses, 'chance' )];
+			$system->idStarClass( $starClass->idStarClass() );
+			$system->starSubclass( rand( $starClass->subclassChanceMin(), $starClass->subclassChanceMax() ) );
+			$num = rand(0, 100);
+			$planets = array(0, 0, 0);
+			$mod = 1.0 / 2.0; # was 2 / 3
+			if ( in_array( $starClass->starType(), array( 'c', 'g' ) ) ) {
+				if ( $num < 25 ) {
+					$planets = $this->distributePlanets( $mod * rand( 1, 7 ) );
+				}
+			} elseif ( in_array( $starClass->starClass(), array( 'O', 'B' ) ) ) {
+				if ( $num < 25 ) {
+					$planets = $this->distributePlanets( $mod * rand( 1, 11 ) );
+				}
+			} elseif ( $starClass->starClass() == 'A' ) {
+				if ( $num < 75 ) {
+					$planets = $this->distributePlanets( $mod * rand( 1, 11 ) );
+				}
+			} elseif ( $starClass->starClass() == 'F' or $starClass->starClass() == 'G' ) {
+				if ( $num < 95 ) {
+					$num = rand( 1, 7 ) + rand( 1, 7 ) + 3;
+					$planets = $this->distributePlanets( $mod * $num );
+				}
+			} elseif ( $starClass->starClass() == 'K' ) {
+				if ( $num < 95 ) {
+					$num = rand( 1, 7 ) + rand( 1, 7 );
+					$planets = $this->distributePlanets( $mod * $num );
+				}
+			} elseif ( $starClass->starClass() == 'M' ) {
+				if ( $num < 95 ) {
+					$num = rand( 1, 7 );
+					$planets = $this->distributePlanets( $mod * $num );
+				}
+			} elseif ( $starClass->starType() == 'd' ) {
+				if ( $num < 10 ) {
+					$num = round( $mod * rand( 1, 7 ) / 2 );
+					$planets = array( 0, 0, $num );
+				}
+			} elseif ( $starClass->starType() == 'n' or $starClass->starType() == 'b' ) {
+				if ( $num < 5 ) {
+					$num = round( $mod * rand( 1, 7 ) / 2 );
+					$planets = array( 0, 0, $num );
+				}
+			}
+			# planets
+			foreach ( $planets as $zone => $num ) {
+				for ( $i = 0; $i <= $num; $i++ ) {
+					$planet = new planet( $this->DB() );
+					$this->generatePlanet( $zone, $planet, $starClass );
+					$result[] = $planet;
+				}
+			}
+			return $result;
+		}
 
+		private function distributePlanets( $num ) {
+			$num = round( $num );
+			if ( $num <= 3 ) {
+				return array( 0, 1, $num - 1 );
+			} elseif ( $num <= 5 ) {
+				return array( 1, 1, $num - 2 );
+			} elseif ( $num <= 7 ) {
+				return array( 1, 2, $num - 3 );
+			} elseif ( $num <= 11 ) {
+				return array( 2, 2, $num - 4 );
+			} else {
+				return array( 2, 3, $num - 5 );
+			}
+		}
+
+		/**
+		 * @param int $zone
+		 * @param planet $planet
+		 * @param starClass $starClass
+		 */
+		private function generatePlanet( $zone, $planet, $starClass ) {
+			$sc = $starClass->idStarClass();
+			$isFGK = ( $sc == 'mF' or $sc == 'mG' or $sc == 'mK' );
+			$isDNB = ( $starClass->starType() == 'd' or $sc == 'n-' or $sc == 'b-' );
+			# diameter and type of planet
+			$num = rand( 0, 100 );
+			if ( $zone == 0 ) { # Zone A
+				if ( $num < 5 ) {
+					$planet->idPlanetType( 'A' );
+					$planet->diameter( 0 );
+				} elseif ( $num < 10 ) {
+					$planet->idPlanetType( 'G' );
+					$planet->diameter( utils::dice( 3, 6, 0 ) * 10000 );
+				} elseif ( $num < 60 ) {
+					$planet->idPlanetType( 'R' );
+					$planet->diameter( utils::dice( 1, 10, 0 ) * 1000 );
+				} elseif ( $num < 70 ) {
+					$planet->idPlanetType( 'D' );
+					$planet->diameter( utils::dice( 2, 6, 2 ) * 1000 );
+				} elseif ( $num < 100 ) {
+					$planet->idPlanetType( 'H' );
+					$planet->diameter( utils::dice( 3, 6, 1 ) * 1000 );
+				}
+			} elseif ( $zone == 1 ) { # Zone B
+				if ( $num < 10 ) {
+					$planet->idPlanetType( 'A' );
+					$planet->diameter( 0 );
+				} elseif ( $num < 15 ) {
+					$planet->idPlanetType( 'G' );
+					$planet->diameter( utils::dice( 3, 6, 0 ) * 10000 );
+				} elseif ( $num < 25 ) {
+					$planet->idPlanetType( 'R' );
+					$planet->diameter( utils::dice( 1, 10, 0 ) * 1000 );
+				} elseif ( $num < 45 ) {
+					$planet->idPlanetType( 'D' );
+					$planet->diameter( utils::dice( 2, 6, 2 ) * 1000 );
+				} elseif ( $num < 70 ) {
+					$planet->idPlanetType( 'H' );
+					$planet->diameter( utils::dice( 3, 6, 1 ) * 1000 );
+				} elseif ( $num < 90 ) {
+					if ( $isFGK ) {
+						$planet->idPlanetType( 'M' );
+						$planet->diameter( utils::dice( 2, 6, 5 ) * 1000 );
+					} else {
+						$planet->idPlanetType( 'H' );
+						$planet->diameter( utils::dice( 3, 6, 1 ) * 1000 );
+					}
+				} elseif ( $num < 100 ) {
+					if ( $isFGK ) {
+						#$planet->idPlanetType( 'E'); $planet->diameter( utils::dice(2, 6, 5) * 1000);
+						$planet->idPlanetType( 'E' );
+						$planet->diameter( utils::dice( 1, 4, 13 ) * 1000 );
+					} else {
+						$planet->idPlanetType( 'H' );
+						$planet->diameter( utils::dice( 3, 6, 1 ) * 1000 );
+					}
+				}
+			} elseif ( $zone == 2 ) { # Zone C
+				if ( $num < 15 ) {
+					$planet->idPlanetType( 'A' );
+					$planet->diameter( 0 );
+				} elseif ( $num < 75 ) {
+					$planet->idPlanetType( 'G' );
+					$planet->diameter( utils::dice( 3, 6, 0 ) * 10000 );
+				} elseif ( $num < 80 ) {
+					$planet->idPlanetType( 'R' );
+					$planet->diameter( utils::dice( 1, 10, 0 ) * 1000 );
+				} elseif ( $num < 90 ) {
+					$planet->idPlanetType( 'C' );
+					$planet->diameter( utils::dice( 1, 10, 0 ) * 1000 );
+				} elseif ( $num < 95 ) {
+					$planet->idPlanetType( 'D' );
+					$planet->diameter( utils::dice( 2, 6, 2 ) * 1000 );
+				} elseif ( $num < 100 ) {
+					if ( $isDNB ) {
+						$planet->idPlanetType( 'C' );
+						$planet->diameter( utils::dice( 1, 10, 0 ) * 1000 );
+					} else {
+						$planet->idPlanetType( 'H' );
+						$planet->diameter( utils::dice( 3, 6, 1 ) * 1000 );
+					}
+				}
+			}
+			# energy
+			$planet->energy( rand( 100 - $zone * 50, 150 - $zone * 50 ) );
+			# minerals
+			if ( in_array( $planet->idPlanetType(), array( 'R', 'D', 'H', 'M' ) ) ) {
+				$density = utils::dice(1, 6, 0) / 2.0 + 3;
+				$planet->minerals( round( ( ($planet->diameter() ) / 500.0 ) + $density * 10.0 + rand( 1, 101 ) / 2.0 - 45 ) * 2 );
+			} elseif ( $planet->idPlanetType() == 'A'){
+				$diameter = utils::dice(1, 10, 0) * 1000; # rock planet
+				$density = utils::dice(1, 6, 0) / 2.0 + 3;
+				$planet->minerals( round( ( ( $diameter / 500.0 ) + $density * 10.0 + rand( 1, 101 ) / 2.0 - 45 ) * 2 ) );
+			} elseif ( $planet->idPlanetType() == 'G' ) {
+				$diameter = utils::dice(3, 6, 1) * 1000; # earth like planet
+				$density = utils::dice(1, 6, 0) / 2.0 + 3;
+				$planet->minerals( round( ( ( $diameter / 500.0 ) + $density * 10.0 + rand( 1, 101 ) / 2.0 - 45 ) * 2 ) );
+			} elseif ( $planet->idPlanetType() == 'E' ) {
+				$planet->minerals( 100 );
+			} else {
+				$planet->minerals( 0 );
+			}
+			if ( $planet->minerals() < 0 ) {
+				$planet->minerals( 0 );
+			}
+			# environment
+			if ( $planet->idPlanetType() == 'E' ) {
+				$planet->plEnv( 100 );
+			} elseif ( $planet->idPlanetType() == 'M' ) {
+				$planet->plEnv( rand( 25, 51 ) );
+
+			} elseif ( $planet->idPlanetType() == 'H' ) {
+				$planet->plEnv( rand( 12, 26 ) );
+
+			} elseif ( $planet->idPlanetType() == 'D' ) {
+				$planet->plEnv( rand( 6, 13 ) );
+
+			} elseif ( $planet->idPlanetType() == 'C' ) {
+				$planet->plEnv( rand( 0, 7 ) );
+
+			} elseif ( $planet->idPlanetType() == 'R' ) {
+				$planet->plEnv( rand( 0, 7 ) );
+			} else {
+				$planet->plEnv( 0 );
+			}
+			# slots
+			$slotsMod = 0.67;
+			$planet->plMaxSlots( round( ( $planet->diameter() / 1000 ) * 1.5 * $slotsMod ) );
+			if ( $planet->idPlanetType() == 'E' ) {
+				$planet->plSlots( 9 );
+				# $planet->slots = round($planet->maxSlots * 0.50)
+			} elseif ( $planet->idPlanetType() == 'M' ) {
+				$planet->plSlots( round( $planet->plMaxSlots() * 0.50 ) );
+			} elseif ( $planet->idPlanetType() == 'H' ) {
+				$planet->plSlots( round( $planet->plMaxSlots() * 0.50 ) );
+			} elseif ( $planet->idPlanetType() == 'D' ) {
+				$planet->plSlots( round( $planet->plMaxSlots() * 0.75 ) );
+			} elseif ( $planet->idPlanetType() == 'C' ) {
+				$planet->plSlots( round( $planet->plMaxSlots() * 0.75 ) );
+			} elseif ( $planet->idPlanetType() == 'R' ) {
+				$planet->plSlots( round( $planet->plMaxSlots() * 0.75 ) );
+			} else {
+				$planet->plSlots( 0 );
+			}
+			# make sure that all planets except A and G has at least one slot
+			if ( in_array( $planet->idPlanetType() , array( 'E', 'M', 'H', 'D', 'C', 'R' ) ) and $planet->plSlots() == 0 ) {
+				#@print "Fixing slots", $planet->idPlanetType(), $planet->slots, $planet->maxSlots
+				$planet->plMaxSlots( max( 1, $planet->plMaxSlots() ) );
+				$planet->plSlots( max( 1, $planet->plSlots() ) );
+			}
+			#print $planet->idPlanetType(), $planet->environ, $planet->minerals*/
+		}
 	}

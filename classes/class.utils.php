@@ -22,6 +22,7 @@
 		 *
 		 * @param array $weightedValues
 		 * @param null|string $weightField
+		 * @throws Exception
 		 * @return mixed
 		 */
 		public static function getRandomWeightedElement( array $weightedValues, $weightField = null ) {
@@ -30,7 +31,13 @@
 			} else {
 				$sum = 0;
 				foreach ( $weightedValues as $value ) {
-					$sum += $value[$weightField];
+					if(is_array($value)){
+						$sum += $value[$weightField];
+					} elseif(is_object($value)){
+						$sum += $value->$weightField();
+					} else {
+						throw new Exception( 'Improper data type' );
+					}
 				}
 			}
 			$rand = mt_rand( 1, $sum );
@@ -39,12 +46,26 @@
 				if ( !isset( $weightField ) ) {
 					$rand -= $value;
 				} else {
-					$rand -= $value[$weightField];
+					if(is_array($value)){
+						$rand -= $value[$weightField];
+					} elseif(is_object($value)){
+						$rand -= $value->$weightField();
+					} else {
+						throw new Exception( 'Improper data type' );
+					}
 				}
 				if ( $rand <= 0 ) {
 					$result = $key;
 					break;
 				}
+			}
+			return $result;
+		}
+
+		public static function dice( $num, $range, $offset ) {
+			$result = $offset;
+			for ( $i = 0; $i <= $num; $i++ ) {
+				$result += rand( 1, $range + 1 );
 			}
 			return $result;
 		}
