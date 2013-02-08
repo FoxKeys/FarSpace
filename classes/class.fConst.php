@@ -12,6 +12,8 @@
 		const E_NOT_IMPLEMENTED = 'Function %s not yet implemented';
 		const E_PARTIALLY_IMPLEMENTED = 'Function %s not fully implemented';
 		const E_NOT_FOUND = 'Object %s with id="%s" not found';
+		const E_ACCESS_DENIED = 'Access denied. You can\'t modify "%" with id="%s"';
+		const E_CANT_CREATE_MORE_GALAXIES = 'You can\'t createFromDB more galaxies.';
 		## additional object types
 		const T_GALAXY = 100;
 

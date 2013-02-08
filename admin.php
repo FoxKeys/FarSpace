@@ -102,7 +102,7 @@ def backup():
 	client.backup(backups_dir + date_str)
 	client.logout()
 
-	# create archive
+	# createFromDB archive
 	zip_fname = date_str + '_backup.zip'
 	zip = zipfile.ZipFile(backups_dir + zip_fname, 'w', zipfile.ZIP_DEFLATED)
 	for fname in os.listdir(backups_dir):
@@ -170,10 +170,10 @@ parser.add_option('--backup', action='store_true', dest='backup',
 	help='make backup')
 parser.add_option('--touch', action='store_true', dest='touch',
 	help='touch inactive players')
-parser.add_option('--create-account', dest='create_account',
-	metavar='login:password:nick:e-mail', help='create account')
-parser.add_option('--create-test-account', action='store_true',
-	dest='create_test_account', help='create test account')
+parser.add_option('--createFromDB-account', dest='create_account',
+	metavar='login:password:nick:e-mail', help='createFromDB account')
+parser.add_option('--createFromDB-test-account', action='store_true',
+	dest='create_test_account', help='createFromDB test account')
 parser.add_option('--show-players', action='store_true', dest='show_players',
 	help='show players')
 parser.add_option('--show-galaxies', action='store_true', dest='show_galaxies',

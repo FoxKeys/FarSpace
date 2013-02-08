@@ -24,8 +24,7 @@
 		 */
 		public function currentUser() {
 			$user = new user( $this->DB() );
-			$user->galaxyCreateLimit(1);
-			return $user;
+			return $user->load( 1 );
 			//ToDo
 			/*if ( empty( self::$currentUser ) ) {
 				throw new Exception( 'Current player is not defined. Probable you are not logged in.' );

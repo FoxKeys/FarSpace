@@ -6,8 +6,17 @@
 	 */
 
 	class galaxyTemplate extends DB {
-		const TABLE_NAME = 'galaxyTemplates';
-		const DENSITY_TABLE_NAME = 'galaxyTemplatesDensity';
+		const TABLE_NAME = 'galaxy_templates';
+
+		/**
+		 * Type Hint wrapper
+		 * @param int $idGalaxyTemplate
+		 * @param FoxDB $DB
+		 * @return galaxyTemplate
+		 */
+		public static function createFromDB( $idGalaxyTemplate, $DB ) {
+			return parent::createFromDB( $idGalaxyTemplate, $DB );
+		}
 
 		/**
 		 * @param int $idGalaxyTemplate
@@ -19,12 +28,7 @@
 			if ( empty( $data ) ) {
 				throw new Exception( sprintf( fConst::E_NOT_FOUND, __CLASS__, $idGalaxyTemplate ) );
 			}
-			$density = $this->DB()->select( 'SELECT * FROM ' . self::DENSITY_TABLE_NAME . ' WHERE idGalaxyTemplate = ?', $idGalaxyTemplate );
-			if ( empty( $density ) ) {
-				throw new Exception( sprintf( 'Density data not found for galaxy template with id="%d"', $idGalaxyTemplate ) );
-			}
-			$this->assignArray( $data );
-			$this->galaxyDensity( $density );
+			return $this->assignArray( $data );
 		}
 
 		/**
@@ -36,57 +40,91 @@
 		}
 
 		/**
-		 * @param null|int $centerX
+		 * Type Hint wrapper
+		 * @param int $value
 		 * @return int
 		 */
-		public function centerX( $centerX = null ) {
-			if ( isset( $centerX ) ) {
-				$this->centerX = $centerX;
-			}
-			return $this->centerX;
+		public function idGalaxyTemplate( $value = null ) {
+			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
 		}
 
 		/**
-		 * @param null|int $centerY
+		 * Type Hint wrapper
+		 * @param int $value
 		 * @return int
 		 */
-		public function centerY( $centerY = null ) {
-			if ( isset( $centerY ) ) {
-				$this->centerY = $centerY;
-			}
-			return $this->centerY;
+		public function centerX( $value = null ) {
+			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
+		}
+
+		/**
+		 * Type Hint wrapper
+		 * @param int $value
+		 * @return int
+		 */
+		public function centerY( $value = null ) {
+			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
 		}
 		
 		/**
-		 * @param null|int $radius
+		 * Type Hint wrapper
+		 * @param int $value
 		 * @return int
 		 */
-		public function radius( $radius = null ) {
-			if ( isset( $radius ) ) {
-				$this->radius = $radius;
-			}
-			return $this->radius;
+		public function radius( $value = null ) {
+			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
 		}
 
 		/**
-		 * @param null|int $galaxyMinR
+		 * Type Hint wrapper
+		 * @param int $value
 		 * @return int
 		 */
-		public function galaxyMinR( $galaxyMinR = null ) {
-			if ( isset( $galaxyMinR ) ) {
-				$this->galaxyMinR = $galaxyMinR;
-			}
-			return $this->galaxyMinR;
+		public function galaxyMinR( $value = null ) {
+			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
 		}
 
 		/**
-		 * @param null|array $galaxyDensity
-		 * @return array
+		 * Type Hint wrapper
+		 * @param int $value
+		 * @return int
 		 */
-		public function galaxyDensity( $galaxyDensity = null ) {
-			if ( isset( $galaxyDensity ) ) {
-				$this->galaxyDensity = $galaxyDensity;
-			}
-			return $this->galaxyDensity;
+		public function galaxyPlayers( $value = null ) {
+			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
+		}
+
+		/**
+		 * Type Hint wrapper
+		 * @param int $value
+		 * @return int
+		 */
+		public function startRMin( $value = null ) {
+			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
+		}
+
+		/**
+		 * Type Hint wrapper
+		 * @param int $value
+		 * @return int
+		 */
+		public function startRMax( $value = null ) {
+			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
+		}
+
+		/**
+		 * Type Hint wrapper
+		 * @param int $value
+		 * @return int
+		 */
+		public function galaxyPlayerGroup( $value = null ) {
+			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
+		}
+		/**
+		 * Type Hint wrapper
+		 * @param int $value
+		 * @return int
+		 */
+		public function galaxyGroupDist( $value = null ) {
+			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
 		}
 	}

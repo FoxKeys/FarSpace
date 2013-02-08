@@ -37,7 +37,7 @@
 		public function connect( $login ) {
 			# to enable sending commands
 			$this->connected = true;
-			# create connection
+			# createFromDB connection
 			log::debug( 'Connecting to the server', $this->server );
 			# send hello message
 			log::debug( 'Sending hello' );

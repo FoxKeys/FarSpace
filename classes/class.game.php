@@ -34,16 +34,26 @@
 		}
 
 		/**
-		 * @return starClasses
+		 * @return starClass[]
 		 */
 		public static function starClasses(){
 			static $starClasses;
 			if ( empty( $starClasses ) ){
-				$starClasses = new starClasses( self::DB() );
+				$starClasses = starClass::selectAll( self::DB() );
 			}
 			return $starClasses;
 		}
 
+		/**
+		 * @return starClass
+		 */
+		/*
+		public function getRandom() {
+			$starClass = new starClass( game::DB() );
+			$data = $this->data();
+			return $starClass->assignArray( $data[utils::getRandomWeightedElement( $data, 'chance' )] );
+		}
+		*/
 		/**
 		 * @return universe
 		 */
