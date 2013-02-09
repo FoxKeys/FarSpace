@@ -131,7 +131,7 @@
 					//system._moveable = 0
 
 					# generate starting systems
-					/*$galaxyPlayers = $galaxyTemplate->galaxyPlayers();
+					$galaxyPlayers = $galaxyTemplate->galaxyPlayers();
 					$galaxyPlayerGroup = $galaxyTemplate->galaxyPlayerGroup();
 					if ( !empty( $galaxyPlayers ) ) {
 						$r = ( $galaxyTemplate->startRMin() + $galaxyTemplate->startRMax() ) / 2;
@@ -192,7 +192,7 @@
 								}
 							}
 						}
-					}*/
+					}
 					# strategic resources
 					/**
 					 * @var galaxyTemplateStratRes[] $stratResArray
