@@ -195,12 +195,11 @@
 					}
 					# strategic resources
 					/**
-					 * @var galaxyTemplateStratRes[] $stratResArray
+					 * @var galaxyTemplateStratRes[] $galaxyTemplateStratResArray
 					 */
-					$stratResArray = array_reverse( galaxyTemplateStratRes::selectByGalaxyTemplate( $galaxyTemplate->idGalaxyTemplate(), $this->DB() ) );
-					foreach ( $stratResArray as $stratRes ) {
+					$galaxyTemplateStratResArray = array_reverse( galaxyTemplateStratRes::selectByGalaxyTemplate( $galaxyTemplate->idGalaxyTemplate(), $this->DB() ) );
+					foreach ( $galaxyTemplateStratResArray as $stratRes ) {
 						log::message( sprintf( "Placing resource %d", $stratRes->idStratRes() ) );
-						//minR, maxR, count = galaxyResources[key]
 						$aoff = utils::randomFloat( 0, pi() * 2 );
 						for ( $i = 0; $i < $stratRes->count(); $i++ ){ //for i in range(0, count):
 							$angle = $aoff + $i * pi() * 2 / $stratRes->count();
@@ -238,47 +237,50 @@
 							log::message( sprintf( "Planet %d - assigned strat res %d", $randomPlanetIdPlanet, $stratRes->idStratRes() ) );
 						}
 					}
-	/*# diseases
-	keys = galaxyDiseases.keys()
-	keys.sort()
-	keys.reverse()
-	for key in keys:
-		print "Placing disease", key
-		minR, maxR, count = galaxyDiseases[key]
-		aoff = random.uniform(0, math.pi * 2)
-		for i in range(0, count):
-			angle = aoff + i * math.pi * 2 / count
-			tr = random.uniform(minR, maxR)
-			x = math.cos(angle) * tr + galaxyCenter[0]
-			y = math.sin(angle) * tr + galaxyCenter[1]
-			# find closest system
-			closest = galaxy.systems[0]
-			minDist = 99999 #(closest.x - x) ** 2 + (closest.y - y) ** 2
-			for system in galaxy.systems:
-				dist = (system.x - x) ** 2 + (system.y - y) ** 2
-				if dist < minDist and system.hasDisease == 0:
-					hasHME = 0
-					starting = 0
-					# find suitable planet
-					for planet in system.planets:
-						if planet.starting:
-							starting = 1
-						if planet.type in ("M", "E"):
-							hasHME = 1
-					if not starting and hasHME:
-						minDist = dist
-						closest = system
-			print "	System", closest.x, closest.y, math.sqrt(minDist)
-			# find planet on the closest system
-			planets = []
-			for planet in closest.planets:
-				if planet.type in ("M", "E"):
-					planets.append(planet)
-			planet = random.choice(planets)
-			planet.disease = key
-			system = planet.compOf
-			system.hasDisease = 1
-			print "	Planet", planet.type*/
+					# diseases
+					/**
+					 * @var galaxyTemplateDisease[] $diseaseArray
+					 */
+					$diseaseArray = array_reverse( galaxyTemplateDisease::selectByGalaxyTemplate( $galaxyTemplate->idGalaxyTemplate(), $this->DB() ) );
+					foreach ( $diseaseArray as $disease ) {
+						log::message( sprintf( "Placing disease %d", $disease->idDisease() ) );
+						$aoff = utils::randomFloat( 0, pi() * 2 );
+						for ( $i = 0; $i < $disease->count(); $i++ ){ //for i in range(0, count):
+							$angle = $aoff + $i * pi() * 2 / $disease->count();
+							$tr = rand( $disease->minR(), $disease->maxR() );
+							$x = cos($angle) * $tr + $galaxy->centerX();
+							$y = sin($angle) * $tr + $galaxy->centerY();
+							# find planet in closest system with planet.type in ("M", "E"), without idDisease and not plStarting
+							$closestSystem = $this->DB()->selectValue( "
+								SELECT  s.idSystem
+								FROM    systems s
+								        INNER JOIN planets p ON p.idSystem = s.idSystem
+								WHERE   p.idDisease is null
+								        AND p.idPlanetType in ('M', 'E')
+								        AND p.plStarting = 0
+								ORDER BY pow((s.x - ?), 2) + pow((s.y - ?), 2)
+								LIMIT   1"
+								, $x, $y
+							);
+							log::message( sprintf( "Closest system %d", $closestSystem ) );
+							$randomPlanetIdPlanet = $this->DB()->selectValue( "
+								SELECT  p.idPlanet
+								FROM    planets p
+								WHERE   p.idSystem = ?
+										AND p.idDisease is null
+										AND p.idPlanetType in ('M', 'E')
+										AND p.plStarting = 0
+								ORDER BY RAND()
+								LIMIT   1"
+								, $closestSystem
+							);
+							$randomPlanet = new planet( $this->DB());
+							$randomPlanet->load( $randomPlanetIdPlanet );
+							$randomPlanet->idDisease( $disease->idDisease() );
+							$randomPlanet->save();
+							log::message( sprintf( "Planet %d - assigned disease %d", $randomPlanetIdPlanet, $disease->idDisease() ) );
+						}
+					}
 					$this->DB()->commit();
 				} catch ( Exception $e ) {
 					$this->DB()->rollBack();
@@ -375,6 +377,7 @@
 			//NOT starting by default
 			$planet->plStarting( 0 );
 			$planet->idStratRes( null );
+			$planet->idDisease( null );
 			$sc = $starClass->idStarClass();
 			$isFGK = ( $sc == 'mF' or $sc == 'mG' or $sc == 'mK' );
 			$isDNB = ( $starClass->starType() == 'd' or $sc == 'n-' or $sc == 'b-' );

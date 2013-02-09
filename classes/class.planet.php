@@ -14,22 +14,7 @@
 		public function save() {
 			if ( !$this->fieldIsSet( 'idPlanet' ) ) {
 				$this->DB()->exec(
-					'INSERT INTO ' . $this::TABLE_NAME . ' ( idSystem, idPlanetType, plDiameter, plEn, plMin, plEnv, plSlots, plMaxSlots, plStarting, idStratRes ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-					$this->idSystem(),
-					$this->idPlanetType(),
-					$this->plDiameter(),
-					$this->plEn(),
-					$this->plMin(),
-					$this->plEnv(),
-					$this->plSlots(),
-					$this->plMaxSlots(),
-					$this->plStarting(),
-					$this->idStratRes()
-				);
-				$this->idPlanet( $this->DB()->lastInsertId() );
-			} else {
-				$this->DB()->exec(
-					'UPDATE ' . $this::TABLE_NAME . ' SET idSystem = ?, idPlanetType = ?, plDiameter = ?, plEn = ?, plMin = ?, plEnv = ?, plSlots = ?, plMaxSlots = ?, plStarting = ?, idStratRes = ? WHERE idPlanet = ?',
+					'INSERT INTO ' . $this::TABLE_NAME . ' ( idSystem, idPlanetType, plDiameter, plEn, plMin, plEnv, plSlots, plMaxSlots, plStarting, idStratRes, idDisease ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
 					$this->idSystem(),
 					$this->idPlanetType(),
 					$this->plDiameter(),
@@ -40,6 +25,23 @@
 					$this->plMaxSlots(),
 					$this->plStarting(),
 					$this->idStratRes(),
+					$this->idDisease()
+				);
+				$this->idPlanet( $this->DB()->lastInsertId() );
+			} else {
+				$this->DB()->exec(
+					'UPDATE ' . $this::TABLE_NAME . ' SET idSystem = ?, idPlanetType = ?, plDiameter = ?, plEn = ?, plMin = ?, plEnv = ?, plSlots = ?, plMaxSlots = ?, plStarting = ?, idStratRes = ?, idDisease = ? WHERE idPlanet = ?',
+					$this->idSystem(),
+					$this->idPlanetType(),
+					$this->plDiameter(),
+					$this->plEn(),
+					$this->plMin(),
+					$this->plEnv(),
+					$this->plSlots(),
+					$this->plMaxSlots(),
+					$this->plStarting(),
+					$this->idStratRes(),
+					$this->idDisease(),
 					$this->idPlanet()
 				);
 			}
@@ -169,6 +171,15 @@
 		 * @return int
 		 */
 		public function idStratRes( $value = null ) {
+			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
+		}
+
+		/**
+		 * Type Hint wrapper
+		 * @param int $value
+		 * @return int
+		 */
+		public function idDisease( $value = null ) {
 			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
 		}
 	}
