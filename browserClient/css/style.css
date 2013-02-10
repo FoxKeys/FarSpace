@@ -1,0 +1,10 @@
+fieldset {
+    text-align: center;
+}
+
+fieldset label {
+    width: 120px;
+    display: inline-block;
+    text-align: right;
+    margin-right: 4px;
+}

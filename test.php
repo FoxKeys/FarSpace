@@ -8,7 +8,7 @@
 	ini_set( "display_errors", 1 );
 
 
-	require_once( 'configFox.php' );
+	require_once( 'config.php' );
 	require_once( 'autoloader.php' );
 	/*
 		$system = new system( game::DB() );

@@ -6,6 +6,5 @@
 	 */
 
 	class config{
-		public static $DB = array( 'DSN' => '', 'username' => '', 'password' => '' );
-		public static $galaxyTemplates = array( array( 'centerX' => 50, 'centerY' => 50 ) );
+		public static $DB = array( 'DSN' => 'mysql:host=localhost;dbname=fox_ospace;charset=utf8', 'username' => 'fox_ospace', 'password' => 'b3qkcb3qkc' );
 	}
