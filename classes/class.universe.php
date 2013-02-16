@@ -529,4 +529,24 @@
 			}
 			#print $planet->idPlanetType(), $planet->environ, $planet->plMin*/
 		}
+
+		/**
+		 * @param int $idUniverse
+		 * @throws Exception
+		 * @return null|object
+		 */
+		public function getIntroInfo( $idUniverse ) {
+			$result = $this->DB()->selectRow( "
+				SELECT  idUniverse, name, turn, now() as serverTime
+				FROM    ".self::TABLE_NAME."
+				WHERE	idUniverse = ?
+				LIMIT   1",
+				(int)$idUniverse
+			);
+			if(empty($result)){
+				throw new Exception( sprintf( fConst::E_NOT_FOUND, __CLASS__, $idUniverse ) );
+			}
+			$result['lastClientVersion'] = config::$ClientVersion;
+			return (object)$result;
+		}
 	}

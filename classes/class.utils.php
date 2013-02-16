@@ -69,4 +69,12 @@
 			}
 			return $result;
 		}
+
+		function openssl_random_pseudo_bytes( $length ) {
+			$length_n = (int)$length; // shell injection is no fun
+			$handle = popen( "/usr/bin/openssl rand $length_n", "r" );
+			$data = stream_get_contents( $handle );
+			pclose( $handle );
+			return $data;
+		}
 	}

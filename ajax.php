@@ -28,7 +28,7 @@
 			header( "Pragma: no-cache" );
 			header( 'Content-Type: application/json; charset=utf-8' );
 
-			$action = !empty( $_POST['action'] ) ? $_POST['action'] : '';
+			$action = !empty( $_POST['action'] ) ? preg_replace( '/[^a-zA-Z0-9_]/i', '', $_POST['action'] ) : '';
 			if ( empty( $action ) ) {
 				throw new Exception( 'Empty "action" parameter' );
 			}
@@ -40,7 +40,7 @@
 			require_once( 'config.php' );
 			require_once( 'autoloader.php' );
 
-			$RPC = new game();
+			$RPC = new RPC();
 
 			if ( !method_exists( $RPC, $action ) ) {
 				throw new Exception( 'RPC method "' . $action . '" not found.' );

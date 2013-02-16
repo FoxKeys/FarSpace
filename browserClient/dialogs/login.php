@@ -7,7 +7,7 @@
 <section id="login-dialog" style="display: none">
 	<form action="/ajax.php" method="post">
 		<fieldset>
-			<input type="hidden" name="action" value="login" />
+			<input type="hidden" name="action" value="ajaxLogin" />
 		</fieldset>
 		<fieldset>
 			<div><label for="login-login">Login:</label><input type="text" name="login" id="login-login" /></div>

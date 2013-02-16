@@ -97,4 +97,8 @@
 		public function y( $y = null ) {
 			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
 		}
+
+		public function getScanInfos( $scanPwr, $player ) {
+			//
+		}
 	}
