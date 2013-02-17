@@ -4,7 +4,7 @@
 	 * Author: Fox foxkeys@gmail.com
 	 * Date Time: 06.02.2013 3:26
 	 */
-	class auth extends DB {
+	class auth extends activeRecord {
 		const LOGIN_REGEX = '/[^a-zA-Z0-9_]/i';
 		const TABLE_USERS = 'users';
 		const TABLE_SESSIONS = 'users_sessions';
@@ -38,7 +38,7 @@
 		 */
 		public function login( $login, $password ) {
 			//Try to login
-			$idUser = $this->DB()->selectValue(
+			$idUser = game::DB()->selectValue(
 				'SELECT idUser FROM ' . self::TABLE_USERS . ' WHERE login = ? and hash = md5( concat( salt, ?) )', $login, $password
 			);
 			if ( !empty( $idUser ) ) {
@@ -48,7 +48,7 @@
 					throw new Exception( 'openssl_random_pseudo_bytes error' );
 				}
 				$ssid = md5( $rand );
-				$this->DB()->exec(
+				game::DB()->exec(
 					'INSERT INTO ' . self::TABLE_SESSIONS . ' (idUser, ssid, endTime) VALUES (?, ?, DATE_ADD(now(), INTERVAL ? SECOND))',
 					$idUser, $ssid, self::SESSION_TIMEOUT
 				);
@@ -56,7 +56,7 @@
 				$this->setSSID( $ssid );
 				$this->idUser = $idUser;
 				//Remove obsolete sessions from DB
-				$this->DB()->exec(
+				game::DB()->exec(
 					'DELETE FROM ' . self::TABLE_SESSIONS . ' WHERE idUser = ? and endTime < now()',
 					$idUser
 				);
@@ -87,7 +87,7 @@
 		 * @return user|null
 		 */
 		public function currentUser() {
-			$user = new user( $this->DB() );
+			$user = new user( );
 			return $user->load( $this->idUser );
 			//ToDo
 			/*if ( empty( self::$currentUser ) ) {

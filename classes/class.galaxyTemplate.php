@@ -5,17 +5,16 @@
 	 * Date Time: 06.02.2013 6:06
 	 */
 
-	class galaxyTemplate extends DB {
+	class galaxyTemplate extends activeRecord {
 		const TABLE_NAME = 'galaxy_templates';
 
 		/**
 		 * Type Hint wrapper
 		 * @param int $idGalaxyTemplate
-		 * @param FoxDB $DB
 		 * @return galaxyTemplate
 		 */
-		public static function createFromDB( $idGalaxyTemplate, $DB ) {
-			return parent::createFromDB( $idGalaxyTemplate, $DB );
+		public static function createFromDB( $idGalaxyTemplate ) {
+			return parent::createFromDB( $idGalaxyTemplate );
 		}
 
 		/**
@@ -24,7 +23,7 @@
 		 * @return \galaxyTemplate
 		 */
 		public function load( $idGalaxyTemplate ) {
-			$data = $this->DB()->selectRow( 'SELECT * FROM ' . self::TABLE_NAME . ' WHERE idGalaxyTemplate = ?', $idGalaxyTemplate );
+			$data = game::DB()->selectRow( 'SELECT * FROM ' . self::TABLE_NAME . ' WHERE idGalaxyTemplate = ?', $idGalaxyTemplate );
 			if ( empty( $data ) ) {
 				throw new Exception( sprintf( fConst::E_NOT_FOUND, __CLASS__, $idGalaxyTemplate ) );
 			}

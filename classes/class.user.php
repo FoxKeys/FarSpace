@@ -5,7 +5,7 @@
 	 * Date Time: 07.02.2013 14:39
 	 */
 
-	class user extends DB {
+	class user extends activeRecord {
 		const USERS_TABLE_NAME = 'users';
 
 		/**
@@ -14,7 +14,7 @@
 		 * @return user
 		 */
 		public function load( $idUser ) {
-			$data = $this->DB()->selectRow( 'SELECT * FROM ' . self::USERS_TABLE_NAME . ' WHERE idUser = ?', $idUser );
+			$data = game::DB()->selectRow( 'SELECT * FROM ' . self::USERS_TABLE_NAME . ' WHERE idUser = ?', $idUser );
 			if ( empty( $data ) ) {
 				throw new Exception( sprintf( fConst::E_NOT_FOUND, __CLASS__, $idUser ) );
 			}
@@ -35,7 +35,7 @@
 				if ( $idUser != game::auth()->currentUser()->idUser() ) {
 					throw new Exception( sprintf( fConst::E_ACCESS_DENIED, __CLASS__, $idUser ) );
 				}
-				$this->DB()->exec(
+				game::DB()->exec(
 					'UPDATE ' . $this::USERS_TABLE_NAME . ' SET galaxyCreateLimit = ? WHERE idUser = ?',
 					$this->galaxyCreateLimit(),
 					$idUser
@@ -45,18 +45,20 @@
 		}
 
 		/**
-		 *
-		 * @param int $galaxyCreateLimit
+		 * Type Hint wrapper
+		 * @param int $value
 		 * @return int
 		 */
-		public function galaxyCreateLimit( $galaxyCreateLimit = null ) {
+		public function galaxyCreateLimit( $value = null ) {
 			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
 		}
 
 		/**
+		 * Type Hint wrapper
+		 * @param int $value
 		 * @return int
 		 */
-		public function idUser(){
-			return $this->fieldGet( __METHOD__ );
+		public function idUser( $value = null ) {
+			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
 		}
 	}

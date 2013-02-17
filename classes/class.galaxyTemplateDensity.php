@@ -5,18 +5,17 @@
 	 * Date Time: 08.02.2013 12:55
 	 */
 
-	class galaxyTemplateDensity extends DB {
+	class galaxyTemplateDensity extends activeRecord {
 		const TABLE_NAME = 'galaxy_templates_density';
 
 		/**
 		 * @param int $idGalaxyTemplate
-		 * @param FoxDB $DB
 		 * @return galaxyTemplateDensity[]
 		 */
-		public static function selectByGalaxyTemplate( $idGalaxyTemplate, $DB ) {
-			$data = $DB->select( 'SELECT * FROM ' . self::TABLE_NAME . ' WHERE idGalaxyTemplate = ?', $idGalaxyTemplate );
+		public static function selectByGalaxyTemplate( $idGalaxyTemplate ) {
+			$data = game::DB()->select( 'SELECT * FROM ' . self::TABLE_NAME . ' WHERE idGalaxyTemplate = ?', $idGalaxyTemplate );
 			foreach ( $data as $key => $dataRecord ) {
-				$data[$key] = self::createFromArray( $dataRecord, $DB );
+				$data[$key] = self::createFromArray( $dataRecord );
 			}
 			return $data;
 		}

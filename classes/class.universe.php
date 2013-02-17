@@ -5,17 +5,16 @@
 	 * Date Time: 06.02.2013 3:16
 	 */
 
-	class universe extends DB {
+	class universe extends activeRecord {
 		const TABLE_NAME = 'universes';
 
 		/**
 		 * Type Hint wrapper
 		 * @param int $idUniverse
-		 * @param FoxDB $DB
 		 * @return universe
 		 */
-		public static function createFromDB( $idUniverse, $DB ) {
-			return parent::createFromDB( $idUniverse, $DB );
+		public static function createFromDB( $idUniverse ) {
+			return parent::createFromDB( $idUniverse );
 		}
 
 		/**
@@ -24,7 +23,7 @@
 		 * @throws Exception
 		 */
 		public function load( $idUniverse ) {
-			$data = $this->DB()->selectRow( 'SELECT * FROM ' . self::TABLE_NAME . ' WHERE idUniverse = ?', $idUniverse );
+			$data = game::DB()->selectRow( 'SELECT * FROM ' . self::TABLE_NAME . ' WHERE idUniverse = ?', $idUniverse );
 			if ( empty( $data ) ) {
 				throw new Exception( sprintf( fConst::E_NOT_FOUND, __CLASS__, $idUniverse ) );
 			}
@@ -58,7 +57,7 @@
 		 */
 		public function createNewGalaxy( $galaxyTemplate, $name, $x = null, $y = null, $radius = null ) {
 			if ( game::auth()->currentUser()->galaxyCreateLimit() > 0 ) {
-				$this->DB()->beginTransaction();
+				game::DB()->beginTransaction();
 				try {
 					$x = isset($x) ? $x : $galaxyTemplate->centerX();
 					$y = isset($y) ? $y : $galaxyTemplate->centerY();
@@ -66,7 +65,7 @@
 
 					log::message( sprintf( "Adding new galaxy '%s' to (%d, %d) radius %d", $name, $x, $y, $radius ) );
 
-					$galaxy = new galaxy( $this->DB() );
+					$galaxy = new galaxy( );
 					$galaxy->idUniverse( $this->idUniverse() );
 					$galaxy->idUser( game::auth()->currentUser()->idUser() );
 					$galaxy->centerX( $x );
@@ -77,7 +76,7 @@
 					$galaxy->save();
 
 					$r = $galaxyTemplate->galaxyMinR() + rand( 0, 5 );
-					$galaxyDensityList = galaxyTemplateDensity::selectByGalaxyTemplate( $galaxyTemplate->idGalaxyTemplate(), $this->DB() );
+					$galaxyDensityList = galaxyTemplateDensity::selectByGalaxyTemplate( $galaxyTemplate->idGalaxyTemplate() );
 					$prevR = 50;
 					$density = 30;
 					while ( $r <= $galaxyTemplate->radius() ) {
@@ -97,7 +96,7 @@
 							$tr = rand( $prevR + 1, $r );
 							$acceptable = false;
 							while ( !$acceptable ) {	//ToDo - extremely inefficient...
-								$system = new system( $this->DB() );
+								$system = new system( );
 								$planets = $this->generateSystem( $system );
 								# check requirements
 								foreach ( $planets as $planet ) {
@@ -122,7 +121,7 @@
 						$r += rand( 20, 40 );
 					}
 					# generate central black hole
-					$system = new system( $this->DB() );
+					$system = new system( );
 					$system->x( $galaxy->centerX() );
 					$system->y( $galaxy->centerY() );
 					$system->idStarClass( "b-" );
@@ -147,7 +146,7 @@
 							$aoff = utils::randomFloat( 0, pi() * 2 );
 							for ( $j = 0; $j < $galaxyPlayerGroup; $j++ ) {	//for j in range(0, galaxyPlayerGroup):
 								$angle = $aoff + $j * pi() * 2 / $galaxyPlayerGroup;
-								$system = new system( $this->DB() );
+								$system = new system( );
 								$system->idGalaxy( $galaxy->idGalaxy() );
 								$system->x( $angle * $galaxyTemplate->galaxyGroupDist() + $gx );
 								$system->y( $angle * $galaxyTemplate->galaxyGroupDist() + $gy );
@@ -197,7 +196,7 @@
 					/**
 					 * @var galaxyTemplateStratRes[] $galaxyTemplateStratResArray
 					 */
-					$galaxyTemplateStratResArray = array_reverse( galaxyTemplateStratRes::selectByGalaxyTemplate( $galaxyTemplate->idGalaxyTemplate(), $this->DB() ) );
+					$galaxyTemplateStratResArray = array_reverse( galaxyTemplateStratRes::selectByGalaxyTemplate( $galaxyTemplate->idGalaxyTemplate() ) );
 					foreach ( $galaxyTemplateStratResArray as $stratRes ) {
 						log::message( sprintf( "Placing resource %d", $stratRes->idStratRes() ) );
 						$aoff = utils::randomFloat( 0, pi() * 2 );
@@ -207,7 +206,7 @@
 							$x = cos($angle) * $tr + $galaxy->centerX();
 							$y = sin($angle) * $tr + $galaxy->centerY();
 							# find planet in closest system with planet.type in ("D", "R", "C"), without idStratRes and not plStarting
-							$closestSystem = $this->DB()->selectValue( "
+							$closestSystem = game::DB()->selectValue( "
 								SELECT  s.idSystem
 								FROM    systems s
 								        INNER JOIN planets p ON p.idSystem = s.idSystem
@@ -219,7 +218,7 @@
 								, $x, $y
 							);
 							log::message( sprintf( "Closest system %d", $closestSystem ) );
-							$randomPlanetIdPlanet = $this->DB()->selectValue( "
+							$randomPlanetIdPlanet = game::DB()->selectValue( "
 								SELECT  p.idPlanet
 								FROM    planets p
 								WHERE   p.idSystem = ?
@@ -230,7 +229,7 @@
 								LIMIT   1"
 								, $closestSystem
 							);
-							$randomPlanet = new planet( $this->DB());
+							$randomPlanet = new planet();
 							$randomPlanet->load( $randomPlanetIdPlanet );
 							$randomPlanet->idStratRes( $stratRes->idStratRes() );
 							$randomPlanet->save();
@@ -241,7 +240,7 @@
 					/**
 					 * @var galaxyTemplateDisease[] $diseaseArray
 					 */
-					$diseaseArray = array_reverse( galaxyTemplateDisease::selectByGalaxyTemplate( $galaxyTemplate->idGalaxyTemplate(), $this->DB() ) );
+					$diseaseArray = array_reverse( galaxyTemplateDisease::selectByGalaxyTemplate( $galaxyTemplate->idGalaxyTemplate() ) );
 					foreach ( $diseaseArray as $disease ) {
 						log::message( sprintf( "Placing disease %d", $disease->idDisease() ) );
 						$aoff = utils::randomFloat( 0, pi() * 2 );
@@ -251,7 +250,7 @@
 							$x = cos($angle) * $tr + $galaxy->centerX();
 							$y = sin($angle) * $tr + $galaxy->centerY();
 							# find planet in closest system with planet.type in ("M", "E"), without idDisease and not plStarting
-							$closestSystem = $this->DB()->selectValue( "
+							$closestSystem = game::DB()->selectValue( "
 								SELECT  s.idSystem
 								FROM    systems s
 								        INNER JOIN planets p ON p.idSystem = s.idSystem
@@ -263,7 +262,7 @@
 								, $x, $y
 							);
 							log::message( sprintf( "Closest system %d", $closestSystem ) );
-							$randomPlanetIdPlanet = $this->DB()->selectValue( "
+							$randomPlanetIdPlanet = game::DB()->selectValue( "
 								SELECT  p.idPlanet
 								FROM    planets p
 								WHERE   p.idSystem = ?
@@ -274,16 +273,16 @@
 								LIMIT   1"
 								, $closestSystem
 							);
-							$randomPlanet = new planet( $this->DB());
+							$randomPlanet = new planet();
 							$randomPlanet->load( $randomPlanetIdPlanet );
 							$randomPlanet->idDisease( $disease->idDisease() );
 							$randomPlanet->save();
 							log::message( sprintf( "Planet %d - assigned disease %d", $randomPlanetIdPlanet, $disease->idDisease() ) );
 						}
 					}
-					$this->DB()->commit();
+					game::DB()->commit();
 				} catch ( Exception $e ) {
-					$this->DB()->rollBack();
+					game::DB()->rollBack();
 					throw $e;
 				}
 			} else {
@@ -345,7 +344,7 @@
 			# planets
 			foreach ( $planets as $zone => $num ) {
 				for ( $i = 0; $i < $num; $i++ ) {	//for i in xrange(0, num):
-					$planet = new planet( $this->DB() );
+					$planet = new planet();
 					$this->generatePlanet( $zone, $planet, $starClass );
 					$result[] = $planet;
 				}
@@ -536,7 +535,7 @@
 		 * @return null|object
 		 */
 		public function getIntroInfo( $idUniverse ) {
-			$result = $this->DB()->selectRow( "
+			$result = game::DB()->selectRow( "
 				SELECT  idUniverse, name, turn, now() as serverTime
 				FROM    ".self::TABLE_NAME."
 				WHERE	idUniverse = ?

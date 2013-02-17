@@ -62,6 +62,15 @@
 			return $result;
 		}
 
+		/**
+		 * @param array $array
+		 * @return mixed
+		 */
+		public static function randomElement( $array ) {
+			$array = array_values($array);
+			return $array[rand( 0, count( $array ) - 1 )];
+		}
+
 		public static function dice( $num, $range, $offset ) {
 			$result = $offset;
 			for ( $i = 0; $i < $num; $i++ ) {	//for i in xrange(0, num):

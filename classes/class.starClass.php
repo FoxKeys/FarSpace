@@ -5,25 +5,16 @@
 	 * Date Time: 06.02.2013 10:33
 	 */
 
-	class starClass extends DB {
+	class starClass extends activeRecord {
 		const TABLE_NAME = 'starClasses';
 
 		/**
-		 * Stub to prevent starClass() method execution as constructor
-		 * @param FoxDB $DB
-		 */
-		public function __construct( $DB ) {
-			parent::__construct( $DB );
-		}
-
-		/**
-		 * @param FoxDB $DB
 		 * @return starClass[]
 		 */
-		public static function selectAll( $DB ){
-			$data = $DB->select( 'SELECT * FROM ' . self::TABLE_NAME );
+		public static function selectAll( ){
+			$data = game::DB()->select( 'SELECT * FROM ' . self::TABLE_NAME );
 			foreach($data as $key => $starClassData){
-				$data[$key] = starClass::createFromArray( $starClassData, $DB );
+				$data[$key] = starClass::createFromArray( $starClassData );
 			}
 			return $data;
 		}

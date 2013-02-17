@@ -4,7 +4,7 @@
 	 * Author: Fox foxkeys@gmail.com
 	 * Date Time: 06.02.2013 8:46
 	 */
-	class planetType extends DB {
+	class planetType extends activeRecord {
 		/**
 		 * @var string idPlanetType
 		 */

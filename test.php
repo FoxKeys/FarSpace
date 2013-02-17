@@ -17,7 +17,7 @@
 		}
 	*/
 	//game::galaxyGenerator()->generateGalaxy( 'Test', 1 );
-
+/*
 	$universe = universe::createFromDB( 1, game::DB() );
 	$galaxyTemplate = galaxyTemplate::createFromDB( 1, game::DB() );
 	$currentUser = game::auth()->currentUser();
@@ -28,7 +28,9 @@
 	} else {
 		throw new Exception( fConst::E_CANT_CREATE_MORE_GALAXIES );
 	}
+*/
 
+	player::createNewPlayer( 1, 51 );
 
 	//var_dump( $universe );
 	//var_dump( $galaxyTemplate );

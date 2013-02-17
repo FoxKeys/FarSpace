@@ -5,18 +5,17 @@
 	 * Date Time: 09.02.2013 13:12
 	 */
 
-	class galaxyTemplateStratRes extends DB {
+	class galaxyTemplateStratRes extends activeRecord {
 		const TABLE_NAME = 'galaxy_templates_strat_res';
 
 		/**
 		 * @param int $idGalaxyTemplate
-		 * @param FoxDB $DB
 		 * @return galaxyTemplateStratRes[]
 		 */
-		public static function selectByGalaxyTemplate( $idGalaxyTemplate, $DB ) {
-			$data = $DB->select( 'SELECT * FROM ' . self::TABLE_NAME . ' WHERE idGalaxyTemplate = ? ORDER BY idStratRes', $idGalaxyTemplate );
+		public static function selectByGalaxyTemplate( $idGalaxyTemplate ) {
+			$data = game::DB()->select( 'SELECT * FROM ' . self::TABLE_NAME . ' WHERE idGalaxyTemplate = ? ORDER BY idStratRes', $idGalaxyTemplate );
 			foreach ( $data as $key => $dataRecord ) {
-				$data[$key] = self::createFromArray( $dataRecord, $DB );
+				$data[$key] = self::createFromArray( $dataRecord );
 			}
 			return $data;
 		}

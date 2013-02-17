@@ -5,18 +5,17 @@
 	 * Date Time: 09.02.2013 13:12
 	 */
 
-	class galaxyTemplateDisease extends DB {
+	class galaxyTemplateDisease extends activeRecord {
 		const TABLE_NAME = 'galaxy_templates_diseases';
 
 		/**
 		 * @param int $idGalaxyTemplate
-		 * @param FoxDB $DB
 		 * @return galaxyTemplateDisease[]
 		 */
-		public static function selectByGalaxyTemplate( $idGalaxyTemplate, $DB ) {
-			$data = $DB->select( 'SELECT * FROM ' . self::TABLE_NAME . ' WHERE idGalaxyTemplate = ? ORDER BY idDisease', $idGalaxyTemplate );
+		public static function selectByGalaxyTemplate( $idGalaxyTemplate ) {
+			$data = game::DB()->select( 'SELECT * FROM ' . self::TABLE_NAME . ' WHERE idGalaxyTemplate = ? ORDER BY idDisease', $idGalaxyTemplate );
 			foreach ( $data as $key => $dataRecord ) {
-				$data[$key] = self::createFromArray( $dataRecord, $DB );
+				$data[$key] = self::createFromArray( $dataRecord );
 			}
 			return $data;
 		}

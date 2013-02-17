@@ -4,7 +4,7 @@
 	 * Author: Fox
 	 * Date Time: 09.12.2011 15:01
 	 */
-	abstract class DB {
+	abstract class activeRecord {
 		const E_PROPERTY_NOT_SET = 'Error accessing an unset property "%s"';
 		/**
 		 * @var array
@@ -12,55 +12,34 @@
 		protected $data = array();
 
 		/**
-		 * @var FoxDB $DB
-		 */
-		protected $DB = null;
-
-		/**
-		 * @param FoxDB $DB
-		 */
-		public function __construct( $DB ) {
-			$this->DB = $DB;
-		}
-
-		/**
-		 * @return FoxDB|null
-		 */
-		public function DB() {
-			return $this->DB;
-		}
-
-		/**
 		 * @param $idObject
-		 * @param FoxDB $DB
-		 * @return DB
+		 * @return activeRecord
 		 */
-		public static function createFromDB( $idObject, $DB ) {
+		public static function createFromDB( $idObject ) {
 			$class = get_called_class();
 			/**
-			 * @var DB $instance
+			 * @var activeRecord $instance
 			 */
-			$instance = new $class( $DB );
+			$instance = new $class( );
 			return $instance->load( $idObject );
 		}
 
 		/**
 		 * @param mixed[] $data
-		 * @param FoxDB $DB
-		 * @return DB
+		 * @return activeRecord
 		 */
-		public static function createFromArray( $data, $DB ) {
+		public static function createFromArray( $data ) {
 			$class = get_called_class();
 			/**
-			 * @var DB $instance
+			 * @var activeRecord $instance
 			 */
-			$instance = new $class( $DB );
+			$instance = new $class( );
 			return $instance->assignArray( $data );
 		}
 
 		/**
 		 * @param array $data
-		 * @return \DB
+		 * @return \activeRecord
 		 */
 		public function assignArray( $data ) {
 			foreach ( $data as $key => $value ) {
@@ -108,7 +87,7 @@
 		/**
 		 * @param string $name
 		 * @param mixed $value
-		 * @return \DB
+		 * @return \activeRecord
 		 */
 		protected function fieldSet( $name, $value ) {
 			$this->data[get_class( $this ) . '::' . $name] = $value;

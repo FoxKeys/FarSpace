@@ -4,7 +4,7 @@
 	 * Author: Fox foxkeys@gmail.com
 	 * Date Time: 06.02.2013 8:44
 	 */
-	class planet extends DB {
+	class planet extends activeRecord {
 		const TABLE_NAME = 'planets';
 
 		/**
@@ -13,7 +13,7 @@
 		 */
 		public function save() {
 			if ( !$this->fieldIsSet( 'idPlanet' ) ) {
-				$this->DB()->exec(
+				game::DB()->exec(
 					'INSERT INTO ' . $this::TABLE_NAME . ' ( idSystem, idPlanetType, plDiameter, plEn, plMin, plEnv, plSlots, plMaxSlots, plStarting, idStratRes, idDisease ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
 					$this->idSystem(),
 					$this->idPlanetType(),
@@ -27,11 +27,30 @@
 					$this->idStratRes(),
 					$this->idDisease()
 				);
-				$this->idPlanet( $this->DB()->lastInsertId() );
+				$this->idPlanet( game::DB()->lastInsertId() );
 			} else {
-				$this->DB()->exec(
-					'UPDATE ' . $this::TABLE_NAME . ' SET idSystem = ?, idPlanetType = ?, plDiameter = ?, plEn = ?, plMin = ?, plEnv = ?, plSlots = ?, plMaxSlots = ?, plStarting = ?, idStratRes = ?, idDisease = ? WHERE idPlanet = ?',
+				game::DB()->exec(
+					'UPDATE ' . $this::TABLE_NAME . ' SET
+						idSystem = ?,
+						idPlayer = ?,
+						idPlanetType = ?,
+						plDiameter = ?,
+						plEn = ?,
+						plMin = ?,
+						plEnv = ?,
+						plSlots = ?,
+						plMaxSlots = ?,
+						plStarting = ?,
+						idStratRes = ?,
+						idDisease = ?,
+						storPop = ?,
+						storBio = ?,
+						storEn = ?,
+						scannerPwr = ?,
+						morale = ?
+					WHERE idPlanet = ?',
 					$this->idSystem(),
+					$this->idPlayer(),
 					$this->idPlanetType(),
 					$this->plDiameter(),
 					$this->plEn(),
@@ -42,6 +61,11 @@
 					$this->plStarting(),
 					$this->idStratRes(),
 					$this->idDisease(),
+					$this->storPop(),
+					$this->storBio(),
+					$this->storEn(),
+					$this->scannerPwr(),
+					$this->morale(),
 					$this->idPlanet()
 				);
 			}
@@ -55,7 +79,7 @@
 		 * @return planet
 		 */
 		public function load( $idPlanet ) {
-			$data = $this->DB()->selectRow( 'SELECT * FROM ' . self::TABLE_NAME . ' WHERE idPlanet = ?', $idPlanet );
+			$data = game::DB()->selectRow( 'SELECT p.*, (SELECT count(*) FROM ' . structure::TABLE_NAME . ' WHERE idPlanet = p.idPlanet) as plStructures FROM ' . self::TABLE_NAME . ' p WHERE p.idPlanet = ?', $idPlanet );
 			if ( empty( $data ) ) {
 				throw new Exception( sprintf( fConst::E_NOT_FOUND, __CLASS__, $idPlanet ) );
 			}
@@ -63,16 +87,31 @@
 		}
 
 		/**
+		 * Type Hint wrapper
+		 * @param int $idPlanet
+		 * @return planet
+		 */
+		public static function createFromDB( $idPlanet ) {
+			return parent::createFromDB( $idPlanet );
+		}
+
+		/**
 		 * @param int $idSystem
-		 * @param FoxDB $DB
 		 * @return planet[]
 		 */
-		public static function selectByIdSystem( $idSystem, $DB ) {
-			$planetsData = $DB->select( 'SELECT * FROM ' . self::TABLE_NAME . ' WHERE idSystem = ?', $idSystem );
+		public static function selectByIdSystem( $idSystem ) {
+			$planetsData = game::DB()->select( 'SELECT p.*, (SELECT count(*) FROM ' . structure::TABLE_NAME . ' WHERE idPlanet = p.idPlanet) as plStructures FROM ' . self::TABLE_NAME . ' p WHERE p.idSystem = ?', $idSystem );
 			foreach($planetsData as $key => $planetData){
-				$planetsData[$key] = planet::createFromArray( $planetData, $DB );
+				$planetsData[$key] = planet::createFromArray( $planetData );
 			}
 			return $planetsData;
+		}
+
+		/**
+		 * @return int
+		 */
+		public function plStructures() {
+			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
 		}
 
 		/**
@@ -180,6 +219,60 @@
 		 * @return int
 		 */
 		public function idDisease( $value = null ) {
+			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
+		}
+
+		/**
+		 * Type Hint wrapper
+		 * @param int $value
+		 * @return int
+		 */
+		public function idPlayer( $value = null ) {
+			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
+		}
+
+		/**
+		 * Type Hint wrapper
+		 * @param int $value
+		 * @return int
+		 */
+		public function storPop( $value = null ) {
+			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
+		}
+
+		/**
+		 * Type Hint wrapper
+		 * @param int $value
+		 * @return int
+		 */
+		public function storBio( $value = null ) {
+			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
+		}
+
+		/**
+		 * Type Hint wrapper
+		 * @param int $value
+		 * @return int
+		 */
+		public function storEn( $value = null ) {
+			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
+		}
+
+		/**
+		 * Type Hint wrapper
+		 * @param int $value
+		 * @return int
+		 */
+		public function scannerPwr( $value = null ) {
+			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
+		}
+
+		/**
+		 * Type Hint wrapper
+		 * @param int $value
+		 * @return float
+		 */
+		public function morale( $value = null ) {
 			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
 		}
 	}

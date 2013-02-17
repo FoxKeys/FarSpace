@@ -6,10 +6,10 @@
  */
 
 	class game {
-
+/*
 		public static function init(){
 			self::auth()->login();
-		}
+		}*/
 
 		/**
 		 * @return FoxDB
@@ -64,4 +64,5 @@
 			}
 			return $idUniverse;
 		}
+
 	}
