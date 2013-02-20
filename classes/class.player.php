@@ -120,9 +120,8 @@
 
 				# Grant starting technologies (at medium improvement)
 				game::DB()->exec(
-					'INSERT INTO ' . self::TABLE_PLAYERS_TECHS . ' ( idPlayer, idTech, level ) SELECT ?, idTech, ? FROM '.tech::TABLE_NAME.' WHERE isStarting <> 0',
-					$player->idPlayer(),
-					(rules::$techBaseImprovement + rules::$techMaxImprovement) / 2
+					'INSERT INTO ' . self::TABLE_PLAYERS_TECHS . ' ( idPlayer, idTech, level, available ) SELECT ?, idTech, startingLevel, startingAvailable FROM '.tech::TABLE_NAME.' WHERE startingLevel > 0',
+					$player->idPlayer()
 				);
 
 				# select starting point randomly
@@ -156,31 +155,33 @@
 					$structure->save();
 					$slot++;
 				}
-/*
+
 				# fleet
 				# add basic ships designs
-				tempTechs = [Tech.FTLENG1, Tech.SCOCKPIT1, Tech.SCANNERMOD1, Tech.CANNON1,
-					Tech.CONBOMB1, Tech.SMALLHULL1, Tech.MEDIUMHULL2, Tech.COLONYMOD2]
-				for techID in tempTechs:
-					player.techs[techID] = 1
-				dummy, scoutID = self.cmdPool[T_PLAYER].addShipDesign(tran, player, "Scout", Tech.SMALLHULL1,
-					{Tech.FTLENG1:3, Tech.SCOCKPIT1:1, Tech.SCANNERMOD1:1})
-				dummy, fighterID = self.cmdPool[T_PLAYER].addShipDesign(tran, player, "Fighter", Tech.SMALLHULL1,
-					{Tech.FTLENG1:3, Tech.SCOCKPIT1:1, Tech.CANNON1:1})
-				self.cmdPool[T_PLAYER].addShipDesign(tran, player, "Bomber", Tech.SMALLHULL1,
-					{Tech.FTLENG1:3, Tech.SCOCKPIT1:1, Tech.CONBOMB1:1})
-				dummy, colonyID = self.cmdPool[T_PLAYER].addShipDesign(tran, player, "Colony Ship", Tech.MEDIUMHULL2,
-					{Tech.FTLENG1:4, Tech.SCOCKPIT1:1, Tech.COLONYMOD2:1})
-				for techID in tempTechs:
-					del player.techs[techID]
+				$SMALLHULL1 = playerTech::createFromSymbol( $player->idPlayer(), 'SMALLHULL1' );
+				$FTLENG1 = playerTech::createFromSymbol( $player->idPlayer(), 'FTLENG1' );
+				$SCOCKPIT1 = playerTech::createFromSymbol( $player->idPlayer(), 'SCOCKPIT1' );
+				$SCANNERMOD1 = playerTech::createFromSymbol( $player->idPlayer(), 'SCANNERMOD1' );
+				$CANNON1 = playerTech::createFromSymbol( $player->idPlayer(), 'CANNON1' );
+				$CONBOMB1 = playerTech::createFromSymbol( $player->idPlayer(), 'CONBOMB1' );
+				$MEDIUMHULL2 = playerTech::createFromSymbol( $player->idPlayer(), 'MEDIUMHULL2' );
+				$COLONYMOD2 = playerTech::createFromSymbol( $player->idPlayer(), 'COLONYMOD2' );
+
+				$scoutDesign = new shipDesign( $player->idPlayer(), 'Scout', $SMALLHULL1->idPlayerTech(), $SCOCKPIT1->idPlayerTech(), array( $FTLENG1->idPlayerTech() => 3, $SCANNERMOD1->idPlayerTech() => 1 ) );
+				$scoutDesign->save();
+				$fighterDesign = new shipDesign( $player->idPlayer(), 'Fighter', $SMALLHULL1->idPlayerTech(), $SCOCKPIT1->idPlayerTech(), array( $FTLENG1->idPlayerTech() => 3, $CANNON1->idPlayerTech() => 1 ) );
+				$fighterDesign->save();
+				$bomberDesign = new shipDesign( $player->idPlayer(), 'Bomber', $SMALLHULL1->idPlayerTech(), $SCOCKPIT1->idPlayerTech(), array( $FTLENG1->idPlayerTech() => 3, $CONBOMB1->idPlayerTech() => 1 ) );
+				$bomberDesign->save();
+				$colonyDesign = new shipDesign( $player->idPlayer(), 'Colony Ship', $MEDIUMHULL2->idPlayerTech(), $SCOCKPIT1->idPlayerTech(), array( $FTLENG1->idPlayerTech() => 4, $COLONYMOD2->idPlayerTech() => 1 ) );
+				$colonyDesign->save();
+
 				# add small fleet
-				log.debug('Creating fleet')
-				system = self.db[planet.compOf]
-				fleet = self.cmdPool[T_FLEET].new(T_FLEET)
-				self.db.create(fleet)
-				log.debug('Creating fleet - created', fleet.oid)
-				self.cmdPool[T_FLEET].create(tran, fleet, system, playerID)
-				log.debug('Creating fleet - addShips')
+				log::debug( 'Creating fleet' );
+				$fleet = new fleet( $player->idPlayer(), $planet->idSystem() );
+				$fleet->save();
+/*				log::debug( sprintf( 'Creating fleet - created %d', $fleet->idFleet ) );
+				log::debug( 'Creating fleet - addShips' );
 				self.cmdPool[T_FLEET].addNewShip(tran, fleet, scoutID)
 				self.cmdPool[T_FLEET].addNewShip(tran, fleet, scoutID)
 				self.cmdPool[T_FLEET].addNewShip(tran, fleet, fighterID)

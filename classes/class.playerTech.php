@@ -19,13 +19,22 @@
 		 */
 		public static function createFromSymbol( $idPlayer, $symbol ) {
 			$data = game::DB()->selectRow(
-				'SELECT pt.idTech, pt.level, t.TL, t.symbol, t.name, t.maxHP FROM ' . self::TABLE_NAME . ' pt INNER JOIN ' . tech::TABLE_NAME . ' t ON pt.idTech = t.idTech WHERE pt.idPlayer = ? AND t.symbol = ?',
+				'SELECT pt.idPlayerTech, pt.idTech, pt.level, t.TL, t.symbol, t.name, t.maxHP FROM ' . self::TABLE_NAME . ' pt INNER JOIN ' . tech::TABLE_NAME . ' t ON pt.idTech = t.idTech WHERE pt.idPlayer = ? AND t.symbol = ?',
 				$idPlayer, $symbol
 			);
 			if(empty($data)){
 				throw new ePlayerTechNotFound( sprintf( self::E_SYMBOL_NOT_FOUND, $idPlayer, $symbol ) );
 			}
 			return self::createFromArray( $data );
+		}
+
+		/**
+		 * Type Hint wrapper
+		 * @param int $value
+		 * @return int
+		 */
+		public function idPlayerTech( $value = null ) {
+			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
 		}
 
 		/**
@@ -52,6 +61,15 @@
 		 * @return int
 		 */
 		public function level( $value = null ) {
+			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
+		}
+
+		/**
+		 * Type Hint wrapper
+		 * @param int $value
+		 * @return int
+		 */
+		public function available( $value = null ) {
 			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
 		}
 	}
