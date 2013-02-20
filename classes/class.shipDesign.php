@@ -29,7 +29,7 @@
 		 * @return shipDesign
 		 */
 		public function save(){
-			if ( !$this->fieldIsSet( 'idPlanet' ) ) {
+			if ( !$this->fieldIsSet( 'idShipDesign' ) ) {
 				game::DB()->exec(
 					'INSERT INTO ' . $this::TABLE_NAME . ' ( idPlayer, name, idPlayerTechHull, idPlayerTechControl ) VALUES (?, ?, ?, ?)',
 					$this->idPlayer(),

@@ -15,7 +15,7 @@
 		}
 
 		public function save() {
-			if ( !$this->fieldIsSet( 'idPlanet' ) ) {
+			if ( !$this->fieldIsSet( 'idPlayer' ) ) {
 				game::DB()->exec(
 					'INSERT INTO ' . $this::TABLE_NAME . ' ( idUser, idGalaxy ) VALUES (?, ?)',
 					$this->idUser(),
