@@ -180,9 +180,11 @@
 				log::debug( 'Creating fleet' );
 				$fleet = new fleet( $player->idPlayer(), $planet->idSystem() );
 				$fleet->save();
-/*				log::debug( sprintf( 'Creating fleet - created %d', $fleet->idFleet ) );
+				log::debug( sprintf( 'Creating fleet - created %d', $fleet->idFleet() ) );
 				log::debug( 'Creating fleet - addShips' );
-				self.cmdPool[T_FLEET].addNewShip(tran, fleet, scoutID)
+				$ship = new ship( $fleet->idFleet(), $scoutDesign );
+				$ship->save();
+/*				self.cmdPool[T_FLEET].addNewShip(tran, fleet, scoutID)
 				self.cmdPool[T_FLEET].addNewShip(tran, fleet, scoutID)
 				self.cmdPool[T_FLEET].addNewShip(tran, fleet, fighterID)
 				self.cmdPool[T_FLEET].addNewShip(tran, fleet, fighterID)
