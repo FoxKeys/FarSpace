@@ -5,6 +5,7 @@ PHP clone (another implementation but same idea and gameplay) of Sourceforge "Ou
 
 Unlike of OSpace this project is PHP + mysql, have relational (not object) data structure and REST-like (not RPC) API.
 Features of this approach:
+
 1. Higher code speed and game-server throughput (more galaxies and players per server);
 
 2. Much more simple and robust code (FOREIGN-keys constraints, not-stored, but fast calculated props);
