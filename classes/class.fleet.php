@@ -10,8 +10,9 @@
 		/**
 		 * @param int|null $idPlayer
 		 * @param int|null $idSystem
+		 * @param float $storEn
 		 */
-		public function __construct( $idPlayer = null, $idSystem = null ) {
+		public function __construct( $idPlayer = null, $idSystem = null, $storEn = null ) {
 			$reflectionMethod = new ReflectionMethod( $this, '__construct' );
 			$parameters = $reflectionMethod->getParameters();
 			foreach ( func_get_args() as $index => $value ) {
@@ -22,25 +23,51 @@
 
 		/**
 		 * @throws Exception
-		 * @return shipDesign
+		 * @return fleet
 		 */
 		public function save(){
 			if ( !$this->fieldIsSet( 'idFleet' ) ) {
 				game::DB()->exec(
-					'INSERT INTO ' . $this::TABLE_NAME . ' ( idPlayer, idSystem ) VALUES (?, ?)',
+					'INSERT INTO ' . $this::TABLE_NAME . ' ( idPlayer, idSystem, storEn ) VALUES (?, ?, ?)',
 					$this->idPlayer(),
-					$this->idSystem()
+					$this->idSystem(),
+					$this->storEn()
 				);
 				$this->idFleet( game::DB()->lastInsertId() );
 			} else {
-				throw new Exception( sprintf( fConst::E_PARTIALLY_IMPLEMENTED, __METHOD__ ) );
-				/*game::DB()->exec(
+				game::DB()->exec(
 					'UPDATE ' . $this::TABLE_NAME . ' SET
+						idPlayer = ?,
 						idSystem = ?,
-					WHERE idPlanet = ?',
+						storEn = ?
+					WHERE idFleet = ?',
+					$this->idPlayer(),
 					$this->idSystem(),
-				);*/
+					$this->storEn(),
+					$this->idFleet()
+				);
 			}
+			return $this;
+		}
+
+		/**
+		 * Type Hint wrapper
+		 * @return fleet
+		 */
+		public static function createNew( /*$args*/ ) {
+			return call_user_func_array(array('parent', 'createNew'), func_get_args());
+		}
+
+		/**
+		 * @param ship $ship
+		 * @param float $storEn
+		 * @return fleet
+		 */
+		public function addShip( $ship, $storEn ) {
+			if ( $ship->idFleet() != $this->idFleet() ) {
+				$ship->idFleet( $this->idFleet() );
+			}
+			$this->storEn( $this->storEn() + $storEn );
 			return $this;
 		}
 
@@ -68,6 +95,15 @@
 		 * @return int
 		 */
 		public function idSystem( $value = null ) {
+			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
+		}
+
+		/**
+		 * Type Hint wrapper
+		 * @param float $value
+		 * @return float
+		 */
+		public function storEn( $value = null ) {
 			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
 		}
 	}

@@ -10,8 +10,11 @@
 		/**
 		 * @param int|null $idFleet
 		 * @param int|null $idShipDesign
+		 * @param float $HP
+		 * @param float $shield
+		 * @param float $experience
 		 */
-		public function __construct( $idFleet = null, $idShipDesign = null ) {
+		public function __construct( $idFleet = null, $idShipDesign = null, $HP = null, $shield = null, $experience = null ) {
 			$reflectionMethod = new ReflectionMethod( $this, '__construct' );
 			$parameters = $reflectionMethod->getParameters();
 			foreach ( func_get_args() as $index => $value ) {
@@ -22,14 +25,17 @@
 
 		/**
 		 * @throws Exception
-		 * @return shipDesign
+		 * @return ship
 		 */
 		public function save(){
 			if ( !$this->fieldIsSet( 'idShip' ) ) {
 				game::DB()->exec(
-					'INSERT INTO ' . $this::TABLE_NAME . ' ( idFleet, idShipDesign ) VALUES (?, ?)',
+					'INSERT INTO ' . $this::TABLE_NAME . ' ( idFleet, idShipDesign, HP, shield, experience ) VALUES (?, ?, ?, ?, ?)',
 					$this->idFleet(),
-					$this->idShipDesign()
+					$this->idShipDesign(),
+					$this->HP(),
+					$this->shield(),
+					$this->experience()
 				);
 				$this->idShip( game::DB()->lastInsertId() );
 			} else {
@@ -42,6 +48,14 @@
 				);*/
 			}
 			return $this;
+		}
+
+		/**
+		 * Type Hint wrapper
+		 * @return ship
+		 */
+		public static function createNew( /*$args*/ ) {
+			return call_user_func_array(array('parent', 'createNew'), func_get_args());
 		}
 
 		/**
@@ -68,6 +82,33 @@
 		 * @return int
 		 */
 		public function idShipDesign( $value = null ) {
+			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
+		}
+
+		/**
+		 * Type Hint wrapper
+		 * @param float $value
+		 * @return float
+		 */
+		public function HP( $value = null ) {
+			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
+		}
+
+		/**
+		 * Type Hint wrapper
+		 * @param float $value
+		 * @return float
+		 */
+		public function shield( $value = null ) {
+			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
+		}
+
+		/**
+		 * Type Hint wrapper
+		 * @param float $value
+		 * @return float
+		 */
+		public function experience( $value = null ) {
 			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
 		}
 	}

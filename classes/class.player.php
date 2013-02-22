@@ -167,34 +167,28 @@
 				$MEDIUMHULL2 = playerTech::createFromSymbol( $player->idPlayer(), 'MEDIUMHULL2' );
 				$COLONYMOD2 = playerTech::createFromSymbol( $player->idPlayer(), 'COLONYMOD2' );
 
-				$scoutDesign = new shipDesign( $player->idPlayer(), 'Scout', $SMALLHULL1->idPlayerTech(), $SCOCKPIT1->idPlayerTech(), array( $FTLENG1->idPlayerTech() => 3, $SCANNERMOD1->idPlayerTech() => 1 ) );
-				$scoutDesign->save();
-				$fighterDesign = new shipDesign( $player->idPlayer(), 'Fighter', $SMALLHULL1->idPlayerTech(), $SCOCKPIT1->idPlayerTech(), array( $FTLENG1->idPlayerTech() => 3, $CANNON1->idPlayerTech() => 1 ) );
-				$fighterDesign->save();
-				$bomberDesign = new shipDesign( $player->idPlayer(), 'Bomber', $SMALLHULL1->idPlayerTech(), $SCOCKPIT1->idPlayerTech(), array( $FTLENG1->idPlayerTech() => 3, $CONBOMB1->idPlayerTech() => 1 ) );
-				$bomberDesign->save();
-				$colonyDesign = new shipDesign( $player->idPlayer(), 'Colony Ship', $MEDIUMHULL2->idPlayerTech(), $SCOCKPIT1->idPlayerTech(), array( $FTLENG1->idPlayerTech() => 4, $COLONYMOD2->idPlayerTech() => 1 ) );
-				$colonyDesign->save();
+				$scoutDesign = shipDesign::createNew( $player->idPlayer(), 'Scout', $SMALLHULL1->idPlayerTech(), $SCOCKPIT1->idPlayerTech(), array( $FTLENG1->idPlayerTech() => 3, $SCANNERMOD1->idPlayerTech() => 1 ) )->save();
+				$fighterDesign = shipDesign::createNew( $player->idPlayer(), 'Fighter', $SMALLHULL1->idPlayerTech(), $SCOCKPIT1->idPlayerTech(), array( $FTLENG1->idPlayerTech() => 3, $CANNON1->idPlayerTech() => 1 ) )->save();
+				$bomberDesign = shipDesign::createNew( $player->idPlayer(), 'Bomber', $SMALLHULL1->idPlayerTech(), $SCOCKPIT1->idPlayerTech(), array( $FTLENG1->idPlayerTech() => 3, $CONBOMB1->idPlayerTech() => 1 ) )->save();
+				$colonyDesign = shipDesign::createNew( $player->idPlayer(), 'Colony Ship', $MEDIUMHULL2->idPlayerTech(), $SCOCKPIT1->idPlayerTech(), array( $FTLENG1->idPlayerTech() => 4, $COLONYMOD2->idPlayerTech() => 1 ) )->save();
 
 				# add small fleet
 				log::debug( 'Creating fleet' );
-				$fleet = new fleet( $player->idPlayer(), $planet->idSystem() );
-				$fleet->save();
+				$fleet = fleet::createNew( $player->idPlayer(), $planet->idSystem(), 0 )->save();
 				log::debug( sprintf( 'Creating fleet - created %d', $fleet->idFleet() ) );
+
 				log::debug( 'Creating fleet - addShips' );
-				$ship = new ship( $fleet->idFleet(), $scoutDesign );
-				$ship->save();
-/*				self.cmdPool[T_FLEET].addNewShip(tran, fleet, scoutID)
-				self.cmdPool[T_FLEET].addNewShip(tran, fleet, scoutID)
-				self.cmdPool[T_FLEET].addNewShip(tran, fleet, fighterID)
-				self.cmdPool[T_FLEET].addNewShip(tran, fleet, fighterID)
-				self.cmdPool[T_FLEET].addNewShip(tran, fleet, colonyID)
-				# add player to universe
-				log.debug('Adding player to universe')
-				universe.players.append(playerID)
+				$fleet->addShip( ship::createNew( $fleet->idFleet(), $scoutDesign->idShipDesign(), $scoutDesign->HP(), $scoutDesign->shield(), 0 )->save(), $scoutDesign->storEn() );
+				$fleet->addShip( ship::createNew( $fleet->idFleet(), $scoutDesign->idShipDesign(), $scoutDesign->HP(), $scoutDesign->shield(), 0 )->save(), $scoutDesign->storEn() );
+				$fleet->addShip( ship::createNew( $fleet->idFleet(), $fighterDesign->idShipDesign(), $fighterDesign->HP(), $fighterDesign->shield(), 0 )->save(), $fighterDesign->storEn() );
+				$fleet->addShip( ship::createNew( $fleet->idFleet(), $fighterDesign->idShipDesign(), $fighterDesign->HP(), $fighterDesign->shield(), 0 )->save(), $fighterDesign->storEn() );
+				$fleet->addShip( ship::createNew( $fleet->idFleet(), $colonyDesign->idShipDesign(), $colonyDesign->HP(), $colonyDesign->shield(), 0 )->save(), $colonyDesign->storEn() );
+				$fleet->save();
+
 				# initial scan
-				system = self.db[planet.compOf]
-				log.debug('Processing scan phase')
+				//system = self.db[planet.compOf]
+				//$planet->idSystem()
+/*				log::debug( 'Processing scan phase' );
 				system.scannerPwrs[playerID] = Rules.startingScannerPwr
 				self.cmdPool[T_GALAXY].processSCAN2Phase(tran, galaxy, None)
 				# check if galaxy can be "started"

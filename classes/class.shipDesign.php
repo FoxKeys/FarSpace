@@ -8,6 +8,8 @@
 		const TABLE_NAME = 'ship_designs';
 		const TABLE_NAME_EQUIPMENT = 'ship_designs_equipment';
 
+		private $summary = null;
+
 		/**
 		 * @param int|null $idPlayer
 		 * @param string|null $name
@@ -31,13 +33,21 @@
 		public function save(){
 			if ( !$this->fieldIsSet( 'idShipDesign' ) ) {
 				game::DB()->exec(
-					'INSERT INTO ' . $this::TABLE_NAME . ' ( idPlayer, name, idPlayerTechHull, idPlayerTechControl ) VALUES (?, ?, ?, ?)',
+					'INSERT INTO ' . $this::TABLE_NAME . ' ( idPlayer, name ) VALUES (?, ?)',
 					$this->idPlayer(),
-					$this->name(),
-					$this->idPlayerTechHull(),
-					$this->idPlayerTechControl()
+					$this->name()
 				);
 				$this->idShipDesign( game::DB()->lastInsertId() );
+				game::DB()->exec(
+					'INSERT INTO ' . $this::TABLE_NAME_EQUIPMENT . ' ( idShipDesign, idPlayerTech, qty, hull ) VALUES (?, ?, 1, 1)',
+					$this->idShipDesign(),
+					$this->idPlayerTechHull()
+				);
+				game::DB()->exec(
+					'INSERT INTO ' . $this::TABLE_NAME_EQUIPMENT . ' ( idShipDesign, idPlayerTech, qty, control ) VALUES (?, ?, 1, 1)',
+					$this->idShipDesign(),
+					$this->idPlayerTechControl()
+				);
 				$equipment = $this->equipment();
 				if ( !empty( $equipment ) ) {
 					foreach ( $equipment as $idPlayerTech => $qty ) {
@@ -96,10 +106,44 @@
 
 		/**
 		 * Type Hint wrapper
+		 * @param int $idObject
+		 * @return shipDesign
+		 */
+		public static function createFromDB( $idObject ) {
+			return parent::createFromDB( $idObject );
+		}
+
+		/**
+		 * Type Hint wrapper
+		 * @return shipDesign
+		 */
+		public static function createNew( /*$args*/ ) {
+			return call_user_func_array(array('parent', 'createNew'), func_get_args());
+		}
+
+		/**
+		 *
+		 */
+		private function calcSummary(){
+			$this->summary = game::DB()->selectRow('
+				SELECT IFNULL(SUM(t.maxHP * techEff(pt.level) * e.qty), 0) as HP, IFNULL(SUM(t.maxHP * t.shieldPerc * techEff(pt.level) * e.qty), 0) as shield, IFNULL(SUM(t.storEn * techEff(pt.level) * e.qty), 0) as storEn
+				FROM ' . playerTech::TABLE_NAME . ' pt
+						INNER JOIN ' . $this::TABLE_NAME_EQUIPMENT . ' e ON pt.idPlayerTech = e.idPlayerTech
+						INNER JOIN ' . tech::TABLE_NAME . ' t on pt.idTech = t.idTech
+				WHERE e.idShipDesign = ?',
+				$this->idShipDesign()
+			);
+		}
+
+		/**
+		 * Type Hint wrapper
 		 * @param int $value
 		 * @return int
 		 */
 		public function idShipDesign( $value = null ) {
+			if ( func_num_args() > 0 ) {
+				$this->summary = null;
+			}
 			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
 		}
 
@@ -127,6 +171,9 @@
 		 * @return int
 		 */
 		public function idPlayerTechHull( $value = null ) {
+			if ( func_num_args() > 0 ) {
+				$this->summary = null;
+			}
 			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
 		}
 
@@ -136,6 +183,9 @@
 		 * @return int
 		 */
 		public function idPlayerTechControl( $value = null ) {
+			if ( func_num_args() > 0 ) {
+				$this->summary = null;
+			}
 			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
 		}
 
@@ -145,6 +195,39 @@
 		 * @return array
 		 */
 		public function equipment( $value = null ) {
+			if ( func_num_args() > 0 ) {
+				$this->summary = null;
+			}
 			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
+		}
+
+		/**
+		 * @return float
+		 */
+		public function HP() {
+			if(is_null($this->summary)){
+				$this->calcSummary();
+			}
+			return $this->summary['HP'];
+		}
+
+		/**
+		 * @return float
+		 */
+		public function shield() {
+			if(is_null($this->summary)){
+				$this->calcSummary();
+			}
+			return $this->summary['shield'];
+		}
+
+		/**
+		 * @return float
+		 */
+		public function storEn(){
+			if(is_null($this->summary)){
+				$this->calcSummary();
+			}
+			return $this->summary['storEn'];
 		}
 	}

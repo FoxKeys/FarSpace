@@ -12,6 +12,23 @@
 		protected $data = array();
 
 		/**
+		 * @return activeRecord
+		 */
+		public static function createNew( /*$args*/ ) {
+			$className = get_called_class();
+			$args = func_get_args();
+			/**
+			 * @var activeRecord $instance
+			 */
+			if(count($args) == 0)
+			   return new $className();
+			else {
+			   $r = new ReflectionClass($className);
+				return $r->newInstanceArgs($args);
+			}
+		}
+
+		/**
 		 * @param $idObject
 		 * @return activeRecord
 		 */
