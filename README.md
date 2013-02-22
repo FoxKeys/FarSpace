@@ -16,7 +16,7 @@ Features of this approach:
 
 5. Browser game client can work on almost any platform;
 
-Developers velcome.
+Developers welcome.
 
 Best regards,
 Sycoder
