@@ -86,4 +86,8 @@
 			pclose( $handle );
 			return $data;
 		}
+
+		public static function sendMessage( $obj, $msgID, $whereID, $data ) {
+			//ToDo
+		}
 	}

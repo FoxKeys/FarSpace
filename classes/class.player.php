@@ -23,6 +23,7 @@
 				);
 				$this->idPlayer( game::DB()->lastInsertId() );
 			} else {
+				//ToDo lastLogin
 				throw new Exception( sprintf( fConst::E_PARTIALLY_IMPLEMENTED, __METHOD__ ) );
 				/*game::DB()->exec(
 					'UPDATE ' . $this::TABLE_NAME . ' SET idSystem = ?, idPlanetType = ?, plDiameter = ?, plEn = ?, plMin = ?, plEnv = ?, plSlots = ?, plMaxSlots = ?, plStarting = ?, idStratRes = ?, idDisease = ? WHERE idPlanet = ?',
@@ -41,6 +42,15 @@
 				);*/
 			}
 			return $this;
+		}
+
+		/**
+		 * Type Hint wrapper
+		 * @param int $idGalaxy
+		 * @return player
+		 */
+		public static function createFromDB( $idGalaxy ) {
+			return parent::createFromDB( $idGalaxy );
 		}
 
 		public function getScannerMap() {
@@ -186,17 +196,13 @@
 				$fleet->save();
 
 				# initial scan
-				//system = self.db[planet.compOf]
-				//$planet->idSystem()
-/*				log::debug( 'Processing scan phase' );
-				system.scannerPwrs[playerID] = Rules.startingScannerPwr
-				self.cmdPool[T_GALAXY].processSCAN2Phase(tran, galaxy, None)
+				log::debug( 'Processing scan phase' );
+				game::scanner()->processScanPhase( $galaxy );
 				# check if galaxy can be "started"
-				self.cmdPool[T_GALAXY].enableTime(tran, galaxy)
-				# save game info
-				self.generateGameInfo()
-				return playerID, None*/
+				$galaxy->enableTime()->save();
+
 				game::DB()->commit();
+				return $player;
 			} catch ( Exception $e ) {
 				game::DB()->rollBack();
 				throw $e;
@@ -227,6 +233,15 @@
 		 * @return int
 		 */
 		public function idPlayer( $value = null ) {
+			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
+		}
+
+		/**
+		 * Type Hint wrapper
+		 * @param string $value
+		 * @return string
+		 */
+		public function lastLogin( $value = null ) {
 			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
 		}
 	}

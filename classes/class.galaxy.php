@@ -26,12 +26,17 @@
 				);
 				$this->idGalaxy( game::DB()->lastInsertId() );
 			} else {
-				throw new Exception( sprintf( fConst::E_PARTIALLY_IMPLEMENTED, __METHOD__ ) );
-				/*game::DB()->exec(
-					'UPDATE ' . $this::GALAXIES_TABLE . ' SET emrLevel = ? WHERE idGalaxy = ?',
+				game::DB()->exec('
+					UPDATE ' . $this::TABLE_NAME . '
+					SET name = ?,
+						description = ?,
+						emrLevel = ?,
+						timeEnabled = ?',
+					$this->name(),
+					$this->description(),
 					$this->emrLevel(),
-					$this->idGalaxy()
-				);*/
+					$this->timeEnabled()
+				);
 			}
 			return $this;
 		}
@@ -56,6 +61,73 @@
 		 */
 		public static function createFromDB( $idGalaxy ) {
 			return parent::createFromDB( $idGalaxy );
+		}
+
+		/**
+		 * @return int[]
+		 */
+		public function freeStartingPositions() {
+			$planets = game::DB()->select(
+				'SELECT p.idPlanet FROM ' . planet::TABLE_NAME . ' p INNER JOIN ' . system::TABLE_NAME . ' s ON p.idSystem = s.IdSystem WHERE s.idGalaxy = ? AND p.plStarting <> 0 AND p.idPlayer IS NULL',
+				$this->idGalaxy()
+			);
+			$result = array();
+			foreach ( $planets as $planet ) {
+				$result[] = $planet['idPlanet'];
+			}
+			return $result;
+		}
+
+		public function enableTime( $force = false, $deleteSP = false, $enable = true ) {
+			log::debug( 'IGalaxy', 'Checking for time...' );
+			if ( !$force ) {
+				if ( $this->timeEnabled() ) {
+					return $this;
+				}
+				$canRun = false;
+				# there must be at least 1/2 positions already assigned
+				#if len(obj.startingPos) <= obj.numOfStartPos / 2 and obj.creationTime < time.time() - 2 * 24 * 3600:
+				#   log.debug("Half galaxy populated", len(obj.startingPos), obj.numOfStartPos)
+				#   canRun = 1
+				# at least two days must pass from creation
+				if ( count( $this->freeStartingPositions() ) == 0 ) {
+					log::debug( "All positions taken, starting galaxy" );
+					$canRun = true;
+				}
+				#			if obj.creationTime < time.time() - 2 * 24 * 3600:
+				#				log.debug("Two days passed", obj.creationTime, time.time() - 2 * 24 * 3600)
+				#				canRun = 1
+				if ( !$canRun ) {
+					return $this;
+				}
+			}
+			# ok, enable time
+			log::message( sprintf( 'Galaxy - enabling time for %d', $this->idGalaxy() ) );
+			$this->timeEnabled( $enable );
+			# close galaxy
+			if ( $deleteSP ) {
+				game::DB()->exec(
+					' UPDATE ' . planet::TABLE_NAME . ' p, ' . system::TABLE_NAME . ' s SET plStarting = 0 WHERE p.idSystem = s.IdSystem AND s.idGalaxy = ? AND p.plStarting <> 0 AND p.idPlayer IS NULL',
+					$this->idGalaxy()
+				);
+			}
+			# load new galaxy
+			# TODO
+			# enable time for players
+			$idPlayers = game::DB()->select('
+
+			', $this->idGalaxy());
+			foreach ( $idPlayers as $idPlayer ) {
+				$player = player::createFromDB( $idPlayer );
+				$player->lastLogin( date( 'Y-m-d H:i:s' ) );
+				$player->save();
+				if ( $enable ) {
+					utils::sendMessage( $player, fConst::MSG_ENABLED_TIME, $player->idPlayer(), null );
+				} else {
+					utils::sendMessage( $player, fConst::MSG_DISABLED_TIME, $player->idPlayer(), null );
+				}
+			}
+			return $this;
 		}
 
 		/**
@@ -131,18 +203,21 @@
 		}
 
 		/**
-		 * @return int[]
+		 * Type Hint wrapper
+		 * @param float $value
+		 * @return float
 		 */
-		public function freeStartingPositions() {
-			$planets = game::DB()->select(
-				'SELECT p.idPlanet FROM ' . planet::TABLE_NAME . ' p INNER JOIN ' . system::TABLE_NAME . ' s ON p.idSystem = s.IdSystem WHERE s.idGalaxy = ? AND p.plStarting <> 0 AND p.idPlayer IS NULL',
-				$this->idGalaxy()
-			);
-			$result = array();
-			foreach ( $planets as $planet ) {
-				$result[] = $planet['idPlanet'];
-			}
-			return $result;
+		public function emrLevel( $value = null ) {
+			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
+		}
+
+		/**
+		 * Type Hint wrapper
+		 * @param bool $value
+		 * @return bool
+		 */
+		public function timeEnabled( $value = null ) {
+			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
 		}
 
 	}

@@ -14,11 +14,7 @@
 		const E_NOT_FOUND = 'Object %s with id="%s" not found';
 		const E_ACCESS_DENIED = 'Access denied. You can\'t modify "%" with id="%s"';
 		const E_CANT_CREATE_MORE_GALAXIES = 'You can\'t createFromDB more galaxies.';
-		## additional object types
-		const T_GALAXY = 100;
 
-		# reserved OIDs
-		const OID_NONE = 0;
-		const SERVER_PORT = FS_SERVER_PORT;
-		const SERVER_ADDR_LOCAL = FS_SERVER_ADDR_LOCAL;
+		const MSG_ENABLED_TIME = 1022; # time has been started
+		const MSG_DISABLED_TIME = 1039; # time has been stoped
 	}

@@ -28,7 +28,7 @@
 		public static function auth(){
 			static $auth;
 			if ( empty( $auth ) ){
-				$auth = new auth( self::DB() );
+				$auth = new auth( );
 			}
 			return $auth;
 		}
@@ -54,6 +54,7 @@
 			return $starClass->assignArray( $data[utils::getRandomWeightedElement( $data, 'chance' )] );
 		}
 		*/
+		
 		/**
 		 * @return universe
 		 */
@@ -64,5 +65,17 @@
 			}
 			return $idUniverse;
 		}
+		
+		/**
+		 * @return scanner
+		 */
+		public static function scanner(){
+			static $scanner;
+			if ( empty( $scanner ) ){
+				$scanner = new scanner( );
+			}
+			return $scanner;
+		}
+	
 
 	}
