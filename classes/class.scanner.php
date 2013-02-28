@@ -99,8 +99,8 @@
 						s.y,
 						s.signature,
 						s.idStarClass,
-						CASE WHEN sm.level > ? THEN s.name ELSE NULL END as name,
-						CASE WHEN sm.level > ? THEN s.combatCounter ELSE NULL END as combatCounter
+						CASE WHEN sm.level >= ? THEN s.name ELSE NULL END as name,
+						CASE WHEN sm.level >= ? THEN s.combatCounter ELSE NULL END as combatCounter
 				FROM	' . self::TABLE_NAME_STATIC_MAP . ' sm INNER JOIN ' . system::TABLE_NAME . ' s ON sm.idSystem = s.idSystem
 				WHERE	sm.idPlayer = ?
 						AND sm.level >= ?',
@@ -119,17 +119,20 @@
 				    idPlanet,
 				    signature,
 				    idPlanetType,
-				    CASE WHEN level > :level2InfoScanPwr THEN plDiameter ELSE NULL END as plDiameter,
-				    CASE WHEN level > :level2InfoScanPwr THEN CASE WHEN idPlanetType = "G" THEN NULL ELSE plMin END ELSE NULL END as plMin,
-				    CASE WHEN level > :level2InfoScanPwr THEN plBio ELSE NULL END as plBio,
-				    CASE WHEN level > :level2InfoScanPwr THEN plEn ELSE NULL END as plEn,
-				    CASE WHEN level > :level2InfoScanPwr THEN plSlots ELSE NULL END as plSlots,
-				    CASE WHEN level > :level2InfoScanPwr THEN idStratRes ELSE NULL END as idStratRes,
-				    CASE WHEN level > :level2InfoScanPwr THEN plMaxSlots ELSE NULL END as plMaxSlots,
-				    CASE WHEN level > :level2InfoScanPwr THEN name ELSE NULL END as name,
-				    CASE WHEN level > :level2InfoScanPwr THEN storPop ELSE NULL END as storPop,
-				    CASE WHEN level > :level2InfoScanPwr THEN idPlayer ELSE NULL END as idPlayer
-
+				    CASE WHEN level >= :level2InfoScanPwr THEN plDiameter ELSE NULL END as plDiameter,
+				    CASE WHEN level >= :level2InfoScanPwr THEN CASE WHEN idPlanetType = "G" THEN NULL ELSE plMin END ELSE NULL END as plMin,
+				    CASE WHEN level >= :level2InfoScanPwr THEN plBio ELSE NULL END as plBio,
+				    CASE WHEN level >= :level2InfoScanPwr THEN plEn ELSE NULL END as plEn,
+				    CASE WHEN level >= :level2InfoScanPwr THEN plSlots ELSE NULL END as plSlots,
+				    CASE WHEN level >= :level2InfoScanPwr THEN idStratRes ELSE NULL END as idStratRes,
+				    CASE WHEN level >= :level2InfoScanPwr THEN plMaxSlots ELSE NULL END as plMaxSlots,
+				    CASE WHEN level >= :level3InfoScanPwr THEN name ELSE NULL END as name,
+				    CASE WHEN level >= :level3InfoScanPwr THEN storPop ELSE NULL END as storPop,
+				    CASE WHEN level >= :level3InfoScanPwr THEN idPlayer ELSE NULL END as idPlayer,
+				    CASE WHEN level >= :level4InfoScanPwr THEN CASE WHEN refuelInc > 0 THEN 1 ELSE 0 END ELSE NULL END as hasRefuel,
+					CASE WHEN level >= :level4InfoScanPwr THEN shield ELSE NULL END as shield,
+					CASE WHEN level >= :level4InfoScanPwr THEN -1 ELSE NULL END as prevShield,
+					CASE WHEN level >= :level4InfoScanPwr THEN -1 ELSE NULL END as maxShield
 				FROM
 					(
 						SELECT	(sm.level * p.signature / s.signature) as level,
@@ -147,7 +150,9 @@
 								p.plMaxSlots,
 								p.name,
 								p.storPop,
-								p.idPlayer
+								p.idPlayer,
+								(SELECT MAX(refuelInc * techEff( pt.level ) /* ToDo opStatus*/) FROM ' . structure::TABLE_NAME . ' s INNER JOIN ' . playerTech::TABLE_NAME . ' pt ON s.idTech = pt.idTech INNER JOIN ' . tech::TABLE_NAME . ' t ON s.idTech = t.idTech WHERE s.idPlanet = p.idPlanet AND pt.idPlayer = p.idPlayer) as refuelInc,
+								p.shield
 						FROM	' . self::TABLE_NAME_STATIC_MAP . ' sm
 								INNER JOIN ' . planet::TABLE_NAME . ' p ON sm.idSystem = p.idSystem
 								INNER JOIN ' . system::TABLE_NAME . ' s ON sm.idSystem = s.idSystem
@@ -159,9 +164,15 @@
 					'idPlayer' => $idPlayer,
 					'level1InfoScanPwr' => rules::$level1InfoScanPwr,
 					'level2InfoScanPwr' => rules::$level2InfoScanPwr,
-					'level3InfoScanPwr' => rules::$level3InfoScanPwr
+					'level3InfoScanPwr' => rules::$level3InfoScanPwr,
+					'level4InfoScanPwr' => rules::$level4InfoScanPwr
 				)
 			);
+			//ToDo
+			//if scanPwr >= Rules.level4InfoScanPwr:
+			//SELECT srtuctures
+
+			//ToDo level5
 
 			foreach ( $planets as $planet ) {
 				$result['systems'][$planet['idSystem']]['planets'][] = $planet;
