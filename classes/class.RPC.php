@@ -5,9 +5,14 @@
 	 * Date Time: 10.02.2013 7:19
 	 */
 	class RPC {
-		public function ajaxLogin( ) {
+		public function authLogin( ) {
 			$login = preg_replace( auth::LOGIN_REGEX, '', $_POST['login'] );
 			$password = $_POST['password'];
 			return game::auth()->login( $login, $password );
+		}
+
+		public function universeGetIntroInfo() {
+			$idUniverse = (int)$_REQUEST['idUniverse'];
+			return game::universe()->getIntroInfo( $idUniverse );
 		}
 	}

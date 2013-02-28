@@ -20,4 +20,5 @@
 		public static $level3InfoScanPwr = 1400;
 		public static $level4InfoScanPwr = 1600;
 		public static $maxScanPwr = 200000;
+		public static $partnerScanPwr = 300000;
 	}

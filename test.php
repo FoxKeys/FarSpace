@@ -30,7 +30,9 @@
 	}
 */
 
-	player::createNewPlayer( 1, 51 );
+	//game::scanner()->processScanPhase( galaxy::createFromDB( 51 ) );
+	print_r( game::scanner()->getStaticMap( 42 ) );
+	//player::createNewPlayer( 1, 51 );
 
 	//var_dump( $universe );
 	//var_dump( $galaxyTemplate );

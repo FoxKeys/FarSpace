@@ -77,5 +77,15 @@
 			return $scanner;
 		}
 	
+		/**
+		 * @return buoy
+		 */
+		public static function buoy(){
+			static $buoy;
+			if ( empty( $buoy ) ){
+				$buoy = new buoy( );
+			}
+			return $buoy;
+		}
 
 	}

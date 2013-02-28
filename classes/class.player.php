@@ -54,27 +54,10 @@
 		}
 
 		public function getScannerMap() {
-			/*scanLevels = {}
-			# full map for the admin
-			if obj.oid == OID_ADMIN:
-				universe = tran.db[OID_UNIVERSE]
-				for galaxyID in universe.galaxies:
-					galaxy = tran.db[galaxyID]
-					for systemID in galaxy.systems:
-						system = tran.db[systemID]
-						obj.staticMap[systemID] = 111111
-						for planetID in system.planets:
-							obj.staticMap[planetID] = 111111
-			# adding systems with buoys
-			for objID in obj.buoys:
-				scanLevels[objID] = Rules.level1InfoScanPwr
-			# fixing system scan level for mine fields
-			systems = {}
-			for planetID in obj.planets:
-				systems[tran.db[planetID].compOf] = None
-			for systemID in systems.keys():
-				scanLevels[systemID] = Rules.partnerScanPwr
+			/*$scanLevels = array();
+
 			# player's map
+			//Select max from staticMap/dynamicMap and objects added above
 			for objID in obj.staticMap:
 				scanLevels[objID] = max(scanLevels.get(objID, 0), obj.staticMap[objID])
 			for objID in obj.dynamicMap:

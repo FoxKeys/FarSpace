@@ -37,7 +37,13 @@
 			array_shift( $args );
 			$stmt = $this->prepare( $query );
 			foreach ( $args as $index => $value ) {
-				$stmt->bindValue( $index + 1, $value, $this->getPDOConstantType( $value ) );
+				if ( is_array( $value ) ) {
+					foreach ( $value as $namedName => $namedValue ) {
+						$stmt->bindValue( $namedName, $namedValue, $this->getPDOConstantType( $namedValue ) );
+					}
+				} else {
+					$stmt->bindValue( $index + 1, $value, $this->getPDOConstantType( $value ) );
+				}
 			}
 			$stmt->execute();
 			return $stmt->fetchAll( PDO::FETCH_ASSOC );
