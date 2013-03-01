@@ -15,4 +15,10 @@
 			$idUniverse = (int)$_REQUEST['idUniverse'];
 			return game::universe()->getIntroInfo( $idUniverse );
 		}
+
+		public function scannerGetStaticMap(){
+			//ToDo - session to idUser
+			$idPlayer = 42;
+			return game::scanner()->getStaticMap( $idPlayer );
+		}
 	}

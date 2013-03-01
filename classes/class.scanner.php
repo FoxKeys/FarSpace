@@ -177,6 +177,13 @@
 			foreach ( $planets as $planet ) {
 				$result['systems'][$planet['idSystem']]['planets'][] = $planet;
 			}
+
+			$scanners = game::DB()->select('
+				SELECT	* FROM ' . self::TABLE_NAME . ' s
+				WHERE	s.idPlayer = ?',
+				$idPlayer	//ToDo - add pacts
+			);
+			$result['scanners'] = $scanners;
 			return $result;
 /*
 			if scanPwr >= Rules.level4InfoScanPwr:

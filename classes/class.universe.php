@@ -56,6 +56,7 @@
 		 * @throws Exception
 		 */
 		public function createNewGalaxy( $galaxyTemplate, $name, $x = null, $y = null, $radius = null ) {
+			//ToDo - return to original decimal coords
 			if ( game::auth()->currentUser()->galaxyCreateLimit() > 0 ) {
 				game::DB()->beginTransaction();
 				try {
