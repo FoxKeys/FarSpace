@@ -6,6 +6,7 @@
 	 */
 
 	class universe extends activeRecord {
+		const E_NO_FREE_SYSTEM_NAME = 'System names depleted in selected galaxy template. Use less galaxy size or fill galaxy template system names table with additional names.';
 		const TABLE_NAME = 'universes';
 
 		/**
@@ -48,38 +49,42 @@
 		}
 
 		/**
+		 * @param user $user
 		 * @param galaxyTemplate $galaxyTemplate
 		 * @param string $name
-		 * @param int $x
-		 * @param int $y
-		 * @param int $radius
+		 * @param float $x
+		 * @param float $y
+		 * @param float $radius
 		 * @throws Exception
+		 * @return galaxy
 		 */
-		public function createNewGalaxy( $galaxyTemplate, $name, $x = null, $y = null, $radius = null ) {
+		public function createNewGalaxy( $user, $galaxyTemplate, $name, $x = null, $y = null, $radius = null ) {
 			//ToDo - return to original decimal coords
-			if ( game::auth()->currentUser()->galaxyCreateLimit() > 0 ) {
+			if ( $user->galaxyCreateLimit() > 0 ) {
 				game::DB()->beginTransaction();
 				try {
-					$x = isset($x) ? $x : $galaxyTemplate->centerX();
-					$y = isset($y) ? $y : $galaxyTemplate->centerY();
-					$radius = isset($radius) ? $radius : $galaxyTemplate->radius();
+					$x = isset( $x ) ? $x : $galaxyTemplate->centerX();
+					$y = isset( $y ) ? $y : $galaxyTemplate->centerY();
+					$radius = isset( $radius ) ? $radius : $galaxyTemplate->radius();
 
-					log::message( sprintf( "Adding new galaxy '%s' to (%d, %d) radius %d", $name, $x, $y, $radius ) );
+					log::message( sprintf( "Adding new galaxy '%s' to (%.2f, %.2f) radius %.2f", $name, $x, $y, $radius ) );
 
 					$galaxy = new galaxy( );
 					$galaxy->idUniverse( $this->idUniverse() );
-					$galaxy->idUser( game::auth()->currentUser()->idUser() );
+					$galaxy->idUser( $user->idUser() );
 					$galaxy->centerX( $x );
 					$galaxy->centerY( $y );
 					$galaxy->radius( $radius );
 					$galaxy->name( $name );
 					$galaxy->description( 'New galaxy "' . $name . '"' );
+					$galaxy->emrLevel( $galaxyTemplate->emrLevel() );
 					$galaxy->save();
 
-					$r = $galaxyTemplate->galaxyMinR() + rand( 0, 5 );
+					$r = $galaxyTemplate->galaxyMinR() + utils::randomFloat( 0, 0.5 );
 					$galaxyDensityList = galaxyTemplateDensity::selectByGalaxyTemplate( $galaxyTemplate->idGalaxyTemplate() );
-					$prevR = 50;
-					$density = 30;
+					$systemNamesList = galaxyTemplateSystemName::selectByGalaxyTemplate( $galaxyTemplate->idGalaxyTemplate() );
+					$prevR = 5;
+					$density = 3;
 					while ( $r <= $galaxyTemplate->radius() ) {
 						foreach ( $galaxyDensityList as $galaxyTemplateDensity ) {
 							if ( $galaxyTemplateDensity->radius() <= $r ) {
@@ -94,11 +99,11 @@
 						for ( $i = 0; $i < (int)( $d / $density ); $i++ ) {	//for i in range(0, int(d / density)):
 							$angle = $aoff + $i * $density / $d * pi() * 2;
 							$angle += utils::randomFloat( -$dangle, $dangle );
-							$tr = rand( $prevR + 1, $r );
+							$tr = utils::randomFloat( $prevR + 0.1, $r );
 							$acceptable = false;
 							while ( !$acceptable ) {	//ToDo - extremely inefficient...
 								$system = new system( );
-								$planets = $this->generateSystem( $system );
+								$planets = $this->generateSystem( $system, $systemNamesList );
 								# check requirements
 								foreach ( $planets as $planet ) {
 									if ( in_array( $planet->idPlanetType(), array( 'D', 'R', 'C', 'H', 'M', 'E' ) ) and $planet->plSlots() > 0 ) {
@@ -111,7 +116,7 @@
 									$system->x( cos( $angle ) * $tr + $galaxy->centerX() );
 									$system->y( sin( $angle ) * $tr + $galaxy->centerY() );
 									$system->save();
-									foreach ( $planets as $planet ) {
+									foreach ( $planets as $index => $planet ) {
 										$planet->idSystem( $system->idSystem() );
 										$planet->save();
 									}
@@ -119,7 +124,7 @@
 							}
 						}
 						$prevR = $r;
-						$r += rand( 20, 40 );
+						$r += utils::randomFloat( 2, 4 );
 					}
 					# generate central black hole
 					$system = new system( );
@@ -129,6 +134,7 @@
 					$system->starSubclass( 7 );
 					$system->idGalaxy( $galaxy->idGalaxy() );
 					//system._moveable = 0
+					//ToDo - save?
 
 					# generate starting systems
 					$galaxyPlayers = $galaxyTemplate->galaxyPlayers();
@@ -141,7 +147,7 @@
 						for ( $i = 0; $i < (int)( $galaxyPlayers / $galaxyPlayerGroup ); $i++ ) {	//for i in range(0, galaxyPlayers / galaxyPlayerGroup):
 							log::message( sprintf( "Placing group: %d of %d", $i + 1, ceil( $galaxyPlayers / $galaxyPlayerGroup) ) );
 							$angle = $gaoff + $i * pi() * 2 / ( $galaxyPlayers / $galaxyPlayerGroup );
-							$tr = rand( $galaxyTemplate->startRMin(), $galaxyTemplate->startRMax() );
+							$tr = utils::randomFloat( $galaxyTemplate->startRMin(), $galaxyTemplate->startRMax() );
 							$gx = cos( $angle ) * $tr + $galaxy->centerX();
 							$gy = sin( $angle ) * $tr + $galaxy->centerY();
 							$aoff = utils::randomFloat( 0, pi() * 2 );
@@ -152,7 +158,7 @@
 								$system->x( $angle * $galaxyTemplate->galaxyGroupDist() + $gx );
 								$system->y( $angle * $galaxyTemplate->galaxyGroupDist() + $gy );
 								while ( true ) {	//ToDo - extremely inefficient...
-									$planets = $this->generateSystem( $system );
+									$planets = $this->generateSystem( $system, $systemNamesList );
 									# check system properties
 									$e = 0;
 									$h = 0;
@@ -203,7 +209,7 @@
 						$aoff = utils::randomFloat( 0, pi() * 2 );
 						for ( $i = 0; $i < $stratRes->count(); $i++ ){ //for i in range(0, count):
 							$angle = $aoff + $i * pi() * 2 / $stratRes->count();
-							$tr = rand( $stratRes->minR(), $stratRes->maxR() );
+							$tr = utils::randomFloat( $stratRes->minR(), $stratRes->maxR() );
 							$x = cos($angle) * $tr + $galaxy->centerX();
 							$y = sin($angle) * $tr + $galaxy->centerY();
 							# find planet in closest system with planet.type in ("D", "R", "C"), without idStratRes and not plStarting
@@ -247,7 +253,7 @@
 						$aoff = utils::randomFloat( 0, pi() * 2 );
 						for ( $i = 0; $i < $disease->count(); $i++ ){ //for i in range(0, count):
 							$angle = $aoff + $i * pi() * 2 / $disease->count();
-							$tr = rand( $disease->minR(), $disease->maxR() );
+							$tr = utils::randomFloat( $disease->minR(), $disease->maxR() );
 							$x = cos($angle) * $tr + $galaxy->centerX();
 							$y = sin($angle) * $tr + $galaxy->centerY();
 							# find planet in closest system with planet.type in ("M", "E"), without idDisease and not plStarting
@@ -281,7 +287,10 @@
 							log::message( sprintf( "Planet %d - assigned disease %d", $randomPlanetIdPlanet, $disease->idDisease() ) );
 						}
 					}
+					$user->galaxyCreateLimit( $user->galaxyCreateLimit() - 1 );
+					$user->save();
 					game::DB()->commit();
+					return $galaxy;
 				} catch ( Exception $e ) {
 					game::DB()->rollBack();
 					throw $e;
@@ -293,12 +302,19 @@
 
 		/**
 		 * @param system $system
+		 * @param galaxyTemplateSystemName[] $systemNamesList
+		 * @throws Exception
 		 * @return planet[]
 		 */
-		public function generateSystem( $system ) {
+		public function generateSystem( $system, $systemNamesList ) {
+			if ( empty( $systemNamesList ) ) {
+				throw new Exception( self::E_NO_FREE_SYSTEM_NAME );
+			}
 			$result = array();
 			$starClasses = game::starClasses();
 			$starClass = $starClasses[utils::getRandomWeightedElement( $starClasses, 'chance' )];
+			$systemName = array_pop( $systemNamesList );
+			$system->name( $systemName->name() );
 			$system->idStarClass( $starClass->idStarClass() );
 			$system->starSubclass( rand( $starClass->subclassChanceMin(), $starClass->subclassChanceMax() ) );
 			$num = rand(0, 100);
@@ -346,6 +362,7 @@
 			foreach ( $planets as $zone => $num ) {
 				for ( $i = 0; $i < $num; $i++ ) {	//for i in xrange(0, num):
 					$planet = new planet();
+					$planet->name( $system->name() . ' - ' . $i ); //ToDo - system and planet naming
 					$this->generatePlanet( $zone, $planet, $starClass );
 					$result[] = $planet;
 				}

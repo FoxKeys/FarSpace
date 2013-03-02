@@ -37,14 +37,14 @@
 			} else {
 				game::DB()->exec(
 					'UPDATE ' . $this::TABLE_NAME . ' SET
-						idPlayer = ?,
-						idSystem = ?,
-						storEn = ?
-					WHERE idFleet = ?',
-					$this->idPlayer(),
-					$this->idSystem(),
-					$this->storEn(),
-					$this->idFleet()
+						idPlayer = :idPlayer,
+						idSystem = :idPlayer,
+						storEn = :idPlayer
+					WHERE idFleet = :idPlayer',
+					array( ':idFleet' => $this->idFleet() ),
+					array( ':idPlayer' => $this->idPlayer() ),
+					array( ':idSystem' => $this->idSystem() ),
+					array( ':storEn' => $this->storEn() )
 				);
 			}
 			return $this;

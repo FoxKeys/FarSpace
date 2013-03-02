@@ -93,11 +93,16 @@
 			return map*/
 		}
 
-		public static function createNewPlayer( $idUser, $idGalaxy ) {
+		/**
+		 * @param int $idUser
+		 * @param galaxy $galaxy
+		 * @return player
+		 * @throws Exception
+		 */
+		public static function createNewPlayer( $idUser, $galaxy ) {
 			game::DB()->beginTransaction();
 			try{
 				log::debug( sprintf( 'Creating new player for user %d', $idUser ) );
-				$galaxy = galaxy::createFromDB( $idGalaxy );
 				$startingPositions = $galaxy->freeStartingPositions();
 				if ( empty( $startingPositions ) ) {
 					throw new Exception( 'No such starting position.' );
@@ -106,7 +111,7 @@
 				$player = new player( );
 				$player->idUser( $idUser );
 				//player.timeEnabled = galaxy.timeEnabled	//ToDo - do we need this?
-				$player->idGalaxy( $idGalaxy );
+				$player->idGalaxy( $galaxy->idGalaxy() );
 				# TODO tweak more player's attrs
 				$player->save();
 				log::debug( sprintf( 'Player %d created', $player->idPlayer() ) );

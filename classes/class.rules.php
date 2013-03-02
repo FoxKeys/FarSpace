@@ -14,7 +14,7 @@
 		public static $startingEn = 1000;
 		public static $startingScannerPwr = 100;
 		public static $maxMorale = 100.0;
-		public static $minDistance = 0.001;
+		public static $minDistance = 0.0001;
 		public static $level1InfoScanPwr = 1000;
 		public static $level2InfoScanPwr = 1200;
 		public static $level3InfoScanPwr = 1400;

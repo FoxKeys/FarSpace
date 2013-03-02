@@ -31,8 +31,8 @@
 
 		/**
 		 * Type Hint wrapper
-		 * @param $value
-		 * @return int
+		 * @param float $value
+		 * @return float
 		 */
 		public function minR( $value = null ) {
 			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
@@ -40,8 +40,8 @@
 
 		/**
 		 * Type Hint wrapper
-		 * @param $value
-		 * @return int
+		 * @param float $value
+		 * @return float
 		 */
 		public function maxR( $value = null ) {
 			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );

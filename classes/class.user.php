@@ -36,12 +36,21 @@
 					throw new Exception( sprintf( fConst::E_ACCESS_DENIED, __CLASS__, $idUser ) );
 				}
 				game::DB()->exec(
-					'UPDATE ' . $this::USERS_TABLE_NAME . ' SET galaxyCreateLimit = ? WHERE idUser = ?',
-					$this->galaxyCreateLimit(),
-					$idUser
+					'UPDATE ' . $this::USERS_TABLE_NAME . ' SET galaxyCreateLimit = :galaxyCreateLimit WHERE idUser = :idUser',
+					array( ':galaxyCreateLimit' => $this->galaxyCreateLimit() ),
+					array( ':idUser' => $this->idUser() )
 				);
 			}
 			return $this;
+		}
+
+		/**
+		 * Type Hint wrapper
+		 * @param int $idUser
+		 * @return user
+		 */
+		public static function createFromDB( $idUser ) {
+			return parent::createFromDB( $idUser );
 		}
 
 		/**

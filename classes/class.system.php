@@ -15,12 +15,13 @@
 		public function save() {
 			if ( !$this->fieldIsSet( 'idSystem' ) ) {
 				game::DB()->exec(
-					'INSERT INTO ' . $this::TABLE_NAME . ' ( idGalaxy, x, y, idStarClass, starSubclass ) VALUES (?, ?, ?, ?, ?)',
+					'INSERT INTO ' . $this::TABLE_NAME . ' ( idGalaxy, x, y, idStarClass, starSubclass, name ) VALUES (?, ?, ?, ?, ?, ?)',
 					$this->idGalaxy(),
 					$this->x(),
 					$this->y(),
 					$this->idStarClass(),
-					$this->starSubclass()
+					$this->starSubclass(),
+					$this->name()
 				);
 				$this->idSystem( game::DB()->lastInsertId() );
 			} else {
@@ -82,8 +83,8 @@
 
 		/**
 		 * Type Hint wrapper
-		 * @param int $value
-		 * @return int
+		 * @param float $value
+		 * @return float
 		 */
 		public function x( $value = null ) {
 			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
@@ -91,14 +92,19 @@
 
 		/**
 		 * Type Hint wrapper
-		 * @param int $value
-		 * @return int
+		 * @param float $value
+		 * @return float
 		 */
 		public function y( $value = null ) {
 			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
 		}
 
-		public function getScanInfos( $scanPwr, $player ) {
-			//
+		/**
+		 * Type Hint wrapper
+		 * @param string $value
+		 * @return string
+		 */
+		public function name( $value = null ) {
+			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
 		}
 	}

@@ -15,27 +15,30 @@
 		public function save() {
 			if ( !$this->fieldIsSet( 'idGalaxy' ) ) {
 				game::DB()->exec(
-					'INSERT INTO ' . $this::TABLE_NAME . ' ( idUniverse, idUser, name, description, centerX, centerY, radius ) VALUES (?, ?, ?, ?, ?, ?, ?)',
+					'INSERT INTO ' . $this::TABLE_NAME . ' ( idUniverse, idUser, name, description, centerX, centerY, radius, emrLevel ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
 					$this->idUniverse(),
 					$this->idUser(),
 					$this->name(),
 					$this->description(),
 					$this->centerX(),
 					$this->centerY(),
-					$this->radius()
+					$this->radius(),
+					$this->emrLevel()
 				);
 				$this->idGalaxy( game::DB()->lastInsertId() );
 			} else {
 				game::DB()->exec('
 					UPDATE ' . $this::TABLE_NAME . '
-					SET name = ?,
-						description = ?,
-						emrLevel = ?,
-						timeEnabled = ?',
-					$this->name(),
-					$this->description(),
-					$this->emrLevel(),
-					$this->timeEnabled()
+					SET name = :name,
+						description = :description,
+						emrLevel = :emrLevel,
+						timeEnabled = :timeEnabled
+					WHERE	idGalaxy = :idGalaxy',
+					array( ':idGalaxy' => $this->idGalaxy() ),
+					array( ':name' => $this->name() ),
+					array( ':description' => $this->description() ),
+					array( ':emrLevel' => $this->emrLevel() ),
+					array( ':timeEnabled' => $this->timeEnabled() )
 				);
 			}
 			return $this;
@@ -159,8 +162,8 @@
 
 		/**
 		 * Type Hint wrapper
-		 * @param $value
-		 * @return int
+		 * @param float $value
+		 * @return float
 		 */
 		public function centerX( $value = null ) {
 			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
@@ -168,8 +171,8 @@
 
 		/**
 		 * Type Hint wrapper
-		 * @param $value
-		 * @return int
+		 * @param float $value
+		 * @return float
 		 */
 		public function centerY( $value = null ) {
 			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
@@ -177,8 +180,8 @@
 
 		/**
 		 * Type Hint wrapper
-		 * @param $value
-		 * @return int
+		 * @param float $value
+		 * @return float
 		 */
 		public function radius( $value = null ) {
 			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );

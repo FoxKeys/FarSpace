@@ -21,4 +21,11 @@
 			$idPlayer = 42;
 			return game::scanner()->getStaticMap( $idPlayer );
 		}
+
+		public function scannerGetScannersMap(){
+			//ToDo - session to idUser
+			$idPlayer = 53;
+			return game::scanner()->getScannersMap( $idPlayer );
+		}
+
 	}

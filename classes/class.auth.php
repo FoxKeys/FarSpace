@@ -87,8 +87,14 @@
 		 * @return user|null
 		 */
 		public function currentUser() {
-			$user = new user( );
-			return $user->load( $this->idUser );
+			//ToDo - rewrite
+			static $user;
+			if ( empty( $user ) ) {
+				$user = user::createFromDB( 1 );
+			}
+			//$user = new user( );
+			//return $user->load( $this->idUser );
+			return $user;
 			//ToDo
 			/*if ( empty( self::$currentUser ) ) {
 				throw new Exception( 'Current player is not defined. Probable you are not logged in.' );

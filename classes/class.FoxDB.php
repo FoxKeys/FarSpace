@@ -31,12 +31,12 @@
 			return PDO::PARAM_STR;
 		}
 
-		public function select( $query ) { // ( $query, *$args )
-			//echo $query;
-			$args = func_get_args();
-			array_shift( $args );
-			$stmt = $this->prepare( $query );
-			foreach ( $args as $index => $value ) {
+		/**
+		 * @param PDOStatement $stmt
+		 * @param array $params
+		 */
+		private function bindParams( $stmt, $params ) {
+			foreach ( $params as $index => $value ) {
 				if ( is_array( $value ) ) {
 					foreach ( $value as $namedName => $namedValue ) {
 						$stmt->bindValue( $namedName, $namedValue, $this->getPDOConstantType( $namedValue ) );
@@ -45,26 +45,16 @@
 					$stmt->bindValue( $index + 1, $value, $this->getPDOConstantType( $value ) );
 				}
 			}
+		}
+
+		public function select( $query ) { // ( $query, *$args )
+			//echo $query;
+			$args = func_get_args();
+			array_shift( $args );
+			$stmt = $this->prepare( $query );
+			$this->bindParams( $stmt, $args );
 			$stmt->execute();
 			return $stmt->fetchAll( PDO::FETCH_ASSOC );
-			/*
-			$result = array();
-			if ( $stmt->rowCount() ) {
-				do {
-					$result[] = $stmt->fetchAll( PDO::FETCH_ASSOC );
-				} while ( $stmt->nextRowset() );
-			} else {
-				do {
-					$stmt->errorCode();
-				} while ( $stmt->nextRowset() );
-			}
-
-			if ( count( $result ) == 1 ) {
-				$result = $result[0];
-			}
-
-			return $result;
-			*/
 		}
 
 		public function selectReindex( $query, $indexName ) { // ( $query, *$args )
@@ -73,9 +63,7 @@
 			array_shift( $args );	//$query
 			array_shift( $args );	//$indexName
 			$stmt = $this->prepare( $query );
-			foreach ( $args as $index => $value ) {
-				$stmt->bindValue( $index + 1, $value, $this->getPDOConstantType( $value ) );
-			}
+			$this->bindParams( $stmt, $args );
 			$stmt->execute();
 
 			$result = array();
@@ -108,9 +96,7 @@
 			$args = func_get_args();
 			array_shift( $args );
 			$stmt = $this->prepare( $query );
-			foreach ( $args as $index => $value ) {
-				$stmt->bindValue( $index + 1, $value, $this->getPDOConstantType( $value ) );
-			}
+			$this->bindParams( $stmt, $args );
 			$stmt->execute();
 
 			$result = array();
@@ -160,9 +146,7 @@
 			$args = func_get_args();
 			array_shift( $args );
 			$stmt = $this->prepare( $query );
-			foreach ( $args as $index => $value ) {
-				$stmt->bindValue( $index + 1, $value, $this->getPDOConstantType( $value ) );
-			}
+			$this->bindParams( $stmt, $args );
 			$stmt->execute();
 
 			do {

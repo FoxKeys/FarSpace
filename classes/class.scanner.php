@@ -44,7 +44,7 @@
 						idSystem,
 						CASE WHEN max(level) > ' . rules::$maxScanPwr . ' THEN ' . rules::$maxScanPwr . ' ELSE max(level) END as level2
 					FROM (
-						SELECT *, (signature + ' . $tSigMod . ') * scannerPwr * ( 2.0 - ' . $galaxy->emrLevel() . ' ) * 10 / CASE WHEN distance < ' . rules::$minDistance . ' THEN ' . rules::$minDistance . ' ELSE distance END as level
+						SELECT *, (signature + ' . $tSigMod . ') * scannerPwr * ( 2.0 - ' . $galaxy->emrLevel() . ' ) / CASE WHEN distance < ' . rules::$minDistance . ' THEN ' . rules::$minDistance . ' ELSE distance END as level
 						FROM (
 							SELECT
 								sys.idSystem,
@@ -178,12 +178,7 @@
 				$result['systems'][$planet['idSystem']]['planets'][] = $planet;
 			}
 
-			$scanners = game::DB()->select('
-				SELECT	* FROM ' . self::TABLE_NAME . ' s
-				WHERE	s.idPlayer = ?',
-				$idPlayer	//ToDo - add pacts
-			);
-			$result['scanners'] = $scanners;
+			$result['scanners'] = $this->getScannersMap( $idPlayer );
 			return $result;
 /*
 			if scanPwr >= Rules.level4InfoScanPwr:
@@ -201,5 +196,13 @@
 				if len(obj.minefield) > 1 or (len(obj.minefield) == 1 and len(result.minefield) == 0):
 					result.hasmines = 2 #yes, and some aren't my mines
 			return results*/
+		}
+
+		public function getScannersMap( $idPlayer ) {
+			return game::DB()->select('
+				SELECT	* FROM ' . self::TABLE_NAME . ' s
+				WHERE	s.idPlayer = ?',
+				$idPlayer	//ToDo - add pacts
+			);
 		}
 	}

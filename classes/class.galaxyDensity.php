@@ -22,8 +22,8 @@
 		
 		/**
 		 * Type Hint wrapper
-		 * @param $value
-		 * @return int
+		 * @param float $value
+		 * @return float
 		 */
 		public function radius( $value = null ) {
 			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
@@ -31,8 +31,8 @@
 		
 		/**
 		 * Type Hint wrapper
-		 * @param $value
-		 * @return int
+		 * @param float $value
+		 * @return float
 		 */
 		public function density( $value = null ) {
 			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );

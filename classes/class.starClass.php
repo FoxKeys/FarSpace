@@ -9,6 +9,12 @@
 		const TABLE_NAME = 'starClasses';
 
 		/**
+		 * Stub to prevent starClass() method execution as constructor (old-style constructor)
+		 */
+		public function __construct(){
+		}
+
+		/**
 		 * @return starClass[]
 		 */
 		public static function selectAll( ){

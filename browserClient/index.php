@@ -57,11 +57,15 @@
 
 			function paint(){
 				if (canvas && canvas.getContext) {
+					var self = {
+						showScanners: true,
+						toggleControlAreas: false
+					};
 					var context = canvas.getContext('2d');
 					context.canvas.width  = window.innerWidth;
 					context.canvas.height = window.innerHeight;
 					// coordinates
-					var currX = 30;	//self.currX
+					var currX = -25;	//self.currX
 					var currY = 25;	//self.currY
 					var rect = {top: 0, left:0, right: context.canvas.width, width: context.canvas.width, height: context.canvas.height, bottom: context.canvas.height};
 					var maxX = rect.width;
@@ -132,9 +136,9 @@
                             $.each(scanners, function (index, scanner) {
                                 var sx = Math.round((scanner.x - currX) * scale) + centerX;
                                 var sy = maxY - (Math.round((scanner.y - currY) * scale) + centerY);
-                                var currRange = Math.round(scanner.scannerPwr / 10 * scale * scannerPainter.scanner1range + 2);
-                                var range1 = Math.round(scanner.scannerPwr / 10 * scale * scannerPainter.scanner1range);
-                                var range2 = Math.round(scanner.scannerPwr / 10 * scale * scannerPainter.scanner2range);
+                                var currRange = Math.round(scanner.scannerPwr * scale * scannerPainter.scanner1range + 2);
+                                var range1 = Math.round(scanner.scannerPwr * scale * scannerPainter.scanner1range);
+                                var range2 = Math.round(scanner.scannerPwr * scale * scannerPainter.scanner2range);
                                 if (sx + currRange > 0 && sx - currRange < maxX && sy + currRange > 0 && sy - currRange < maxY) {
                                     context.beginPath();
                                     context.arc(sx, sy, currRange, 0, 2 * Math.PI, false);
@@ -176,7 +180,15 @@
 					//if self.showPirateAreas:
 						//pass # TODO
 					//# grid
-                    scannerPainter.draw(scanners);
+                    if (self.showScanners || self.toggleControlAreas) {
+                        if (self.toggleControlAreas) {
+                            console.log('ToDo: drawControlAreas');
+                            //self.drawControlAreas();
+                        }
+                        else {
+							scannerPainter.draw(scanners);
+                        }
+                    }
                     if (grid.showGrid) {
 						grid.drawGrid();
 					}
@@ -215,10 +227,10 @@
             $.ajax({
                 url: "/ajax.php",
                 type: 'POST',
-                data: {action: 'scannerGetStaticMap'}
+                data: {action: 'scannerGetScannersMap'}
             }).done(function (data) {
 				console.log(data);
-				scanners = data.data.scanners;
+				scanners = data.data;
 				paint();
 			});
 		});

@@ -4,9 +4,6 @@
  * Author: Fox foxkeys@gmail.com
  * Date Time: 04.02.2013 14:25
  */
-	define( 'FS_SERVER_PORT', 5190 );
-	define( 'FS_SERVER_ADDR_LOCAL', 'localhost:' . FS_SERVER_PORT );
-
 	class fConst {
 		const E_NOT_TRANSLATED = 'Function %s not yet translated from Python';
 		const E_NOT_IMPLEMENTED = 'Function %s not yet implemented';

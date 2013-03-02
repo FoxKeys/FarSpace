@@ -20,19 +20,17 @@
 /*
 	$universe = universe::createFromDB( 1, game::DB() );
 	$galaxyTemplate = galaxyTemplate::createFromDB( 1, game::DB() );
-	$currentUser = game::auth()->currentUser();
-	if ( $currentUser->galaxyCreateLimit() > 0 ) {
-		$universe->createNewGalaxy( $galaxyTemplate, 'New test galaxy', 0, 0, 100 );
-		$currentUser->galaxyCreateLimit( $currentUser->galaxyCreateLimit() - 1 );
-		$currentUser->save();
-	} else {
-		throw new Exception( fConst::E_CANT_CREATE_MORE_GALAXIES );
-	}
+	//game::auth()->login( 'root', 'cydvb' );
+	//$currentUser = game::auth()->currentUser();
+	$currentUser = user::createFromDB( 1 );
+	$galaxy = $universe->createNewGalaxy( $currentUser, $galaxyTemplate, 'New test galaxy', 0, 0, 5 );
 */
 
-	//game::scanner()->processScanPhase( galaxy::createFromDB( 51 ) );
-	print_r( game::scanner()->getStaticMap( 42 ) );
-	//player::createNewPlayer( 1, 51 );
+	$galaxy = galaxy::createFromDB( 67 );
+
+	$player = player::createNewPlayer( 1, $galaxy );
+
+	print_r( game::scanner()->getStaticMap( $player->idPlayer() ) );
 
 	//var_dump( $universe );
 	//var_dump( $galaxyTemplate );

@@ -49,8 +49,8 @@
 
 		/**
 		 * Type Hint wrapper
-		 * @param int $value
-		 * @return int
+		 * @param float $value
+		 * @return float
 		 */
 		public function centerX( $value = null ) {
 			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
@@ -58,8 +58,8 @@
 
 		/**
 		 * Type Hint wrapper
-		 * @param int $value
-		 * @return int
+		 * @param float $value
+		 * @return float
 		 */
 		public function centerY( $value = null ) {
 			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
@@ -67,8 +67,8 @@
 		
 		/**
 		 * Type Hint wrapper
-		 * @param int $value
-		 * @return int
+		 * @param float $value
+		 * @return float
 		 */
 		public function radius( $value = null ) {
 			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
@@ -76,8 +76,8 @@
 
 		/**
 		 * Type Hint wrapper
-		 * @param int $value
-		 * @return int
+		 * @param float $value
+		 * @return float
 		 */
 		public function galaxyMinR( $value = null ) {
 			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
@@ -94,8 +94,8 @@
 
 		/**
 		 * Type Hint wrapper
-		 * @param int $value
-		 * @return int
+		 * @param float $value
+		 * @return float
 		 */
 		public function startRMin( $value = null ) {
 			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
@@ -103,8 +103,8 @@
 
 		/**
 		 * Type Hint wrapper
-		 * @param int $value
-		 * @return int
+		 * @param float $value
+		 * @return float
 		 */
 		public function startRMax( $value = null ) {
 			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
@@ -118,12 +118,22 @@
 		public function galaxyPlayerGroup( $value = null ) {
 			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
 		}
+
 		/**
 		 * Type Hint wrapper
-		 * @param int $value
-		 * @return int
+		 * @param float $value
+		 * @return float
 		 */
 		public function galaxyGroupDist( $value = null ) {
+			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
+		}
+
+		/**
+		 * Type Hint wrapper
+		 * @param float $value
+		 * @return float
+		 */
+		public function emrLevel( $value = null ) {
 			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
 		}
 	}
