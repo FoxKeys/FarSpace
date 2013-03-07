@@ -101,9 +101,13 @@
 							$angle += utils::randomFloat( -$dangle, $dangle );
 							$tr = utils::randomFloat( $prevR + 0.1, $r );
 							$acceptable = false;
+							if ( empty( $systemNamesList ) ) {
+								throw new Exception( self::E_NO_FREE_SYSTEM_NAME );
+							}
+							$systemName = array_pop( $systemNamesList );
 							while ( !$acceptable ) {	//ToDo - extremely inefficient...
 								$system = new system( );
-								$planets = $this->generateSystem( $system, $systemNamesList );
+								$planets = $this->generateSystem( $system, $systemName );
 								# check requirements
 								foreach ( $planets as $planet ) {
 									if ( in_array( $planet->idPlanetType(), array( 'D', 'R', 'C', 'H', 'M', 'E' ) ) and $planet->plSlots() > 0 ) {
@@ -133,6 +137,8 @@
 					$system->idStarClass( "b-" );
 					$system->starSubclass( 7 );
 					$system->idGalaxy( $galaxy->idGalaxy() );
+					$system->name( $galaxy->name() );
+					$system->save();
 					//system._moveable = 0
 					//ToDo - save?
 
@@ -157,8 +163,12 @@
 								$system->idGalaxy( $galaxy->idGalaxy() );
 								$system->x( $angle * $galaxyTemplate->galaxyGroupDist() + $gx );
 								$system->y( $angle * $galaxyTemplate->galaxyGroupDist() + $gy );
+								if ( empty( $systemNamesList ) ) {
+									throw new Exception( self::E_NO_FREE_SYSTEM_NAME );
+								}
+								$systemName = array_pop( $systemNamesList );
 								while ( true ) {	//ToDo - extremely inefficient...
-									$planets = $this->generateSystem( $system, $systemNamesList );
+									$planets = $this->generateSystem( $system, $systemName );
 									# check system properties
 									$e = 0;
 									$h = 0;
@@ -302,18 +312,14 @@
 
 		/**
 		 * @param system $system
-		 * @param galaxyTemplateSystemName[] $systemNamesList
+		 * @param galaxyTemplateSystemName $systemName
 		 * @throws Exception
 		 * @return planet[]
 		 */
-		public function generateSystem( $system, $systemNamesList ) {
-			if ( empty( $systemNamesList ) ) {
-				throw new Exception( self::E_NO_FREE_SYSTEM_NAME );
-			}
+		public function generateSystem( $system, $systemName ) {
 			$result = array();
 			$starClasses = game::starClasses();
 			$starClass = $starClasses[utils::getRandomWeightedElement( $starClasses, 'chance' )];
-			$systemName = array_pop( $systemNamesList );
 			$system->name( $systemName->name() );
 			$system->idStarClass( $starClass->idStarClass() );
 			$system->starSubclass( rand( $starClass->subclassChanceMin(), $starClass->subclassChanceMax() ) );

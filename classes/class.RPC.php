@@ -16,16 +16,10 @@
 			return game::universe()->getIntroInfo( $idUniverse );
 		}
 
-		public function scannerGetStaticMap(){
+		public function scannerGetMap(){
 			//ToDo - session to idUser
-			$idPlayer = 42;
-			return game::scanner()->getStaticMap( $idPlayer );
-		}
-
-		public function scannerGetScannersMap(){
-			//ToDo - session to idUser
-			$idPlayer = 53;
-			return game::scanner()->getScannersMap( $idPlayer );
+			$idPlayer = 54;
+			return game::scanner()->getMap( $idPlayer );
 		}
 
 	}

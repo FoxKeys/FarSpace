@@ -23,14 +23,14 @@
 	//game::auth()->login( 'root', 'cydvb' );
 	//$currentUser = game::auth()->currentUser();
 	$currentUser = user::createFromDB( 1 );
-	$galaxy = $universe->createNewGalaxy( $currentUser, $galaxyTemplate, 'New test galaxy', 0, 0, 5 );
+	$galaxy = $universe->createNewGalaxy( $currentUser, $galaxyTemplate, 'New test galaxy', 0, 0, 10 );
 */
 
-	$galaxy = galaxy::createFromDB( 67 );
+	$galaxy = galaxy::createFromDB( 71 );
 
 	$player = player::createNewPlayer( 1, $galaxy );
 
-	print_r( game::scanner()->getStaticMap( $player->idPlayer() ) );
+	//print_r( game::scanner()->getStaticMap( $player->idPlayer() ) );
 
 	//var_dump( $universe );
 	//var_dump( $galaxyTemplate );

@@ -85,12 +85,23 @@
 
 			//Update dynamic map
 			//ToDo
+
 		}
 
 		//ToDo: mapForgetScanPwr
 
-		public function getStaticMap( $idPlayer ) {
+		public function getMap( $idPlayer ) {
 			//ToDo level3InfoScanPwr - result.owner = obj.owner ?
+
+			//Update static map
+			/*game::DB()->exec('
+				INSERT INTO ' . self::TABLE_NAME_STATIC_MAP . '(idPlayer, idSystem, `level` )
+				SELECT 53, idSystem, 10000
+				FROM	' . system::TABLE_NAME . '
+				ON DUPLICATE KEY UPDATE `level` = 10000'
+			);*/
+			//$this->processScanPhase( galaxy::createFromDB( 67 ) );
+
 			$result = array();
 			$systems = game::DB()->select('
 				SELECT	sm.level,
@@ -99,18 +110,21 @@
 						s.y,
 						s.signature,
 						s.idStarClass,
-						CASE WHEN sm.level >= ? THEN s.name ELSE NULL END as name,
-						CASE WHEN sm.level >= ? THEN s.combatCounter ELSE NULL END as combatCounter
+						sc.starClass,
+						CASE WHEN sm.level >= :level2InfoScanPwr THEN s.name ELSE NULL END as name,
+						CASE WHEN sm.level >= :level2InfoScanPwr THEN s.combatCounter ELSE NULL END as combatCounter,
+						CASE WHEN sm.level >= :level2InfoScanPwr THEN getHabitabilityColorCode((SELECT  MAX( plBio ) FROM ' . planet::TABLE_NAME . ' WHERE idSystem = sm.IdSystem)) ELSE NULL END as overlayColorBio
 				FROM	' . self::TABLE_NAME_STATIC_MAP . ' sm INNER JOIN ' . system::TABLE_NAME . ' s ON sm.idSystem = s.idSystem
-				WHERE	sm.idPlayer = ?
-						AND sm.level >= ?',
-				rules::$level2InfoScanPwr,
-				rules::$level2InfoScanPwr,
-				$idPlayer,
-				rules::$level1InfoScanPwr
+						INNER JOIN ' . starClass::TABLE_NAME . ' sc ON s.idStarClass = sc.idStarClass
+				WHERE	sm.idPlayer = :idPlayer
+						AND sm.level >= :level1InfoScanPwr',
+				array(':level2InfoScanPwr' => rules::$level2InfoScanPwr),
+				array(':idPlayer' => $idPlayer),
+				array(':level1InfoScanPwr' => rules::$level1InfoScanPwr)
 			);
-			foreach($systems as $system){
-				$result['systems'][$system['idSystem']] = $system;
+			$systemsIndexes = array();
+			foreach ( $systems as $index => $system ) {
+				$systemsIndexes[$system['idSystem']] = $index;
 			}
 			$planets = game::DB()->select('
 				SELECT
@@ -129,6 +143,7 @@
 				    CASE WHEN level >= :level3InfoScanPwr THEN name ELSE NULL END as name,
 				    CASE WHEN level >= :level3InfoScanPwr THEN storPop ELSE NULL END as storPop,
 				    CASE WHEN level >= :level3InfoScanPwr THEN idPlayer ELSE NULL END as idPlayer,
+				    CASE WHEN level >= :level3InfoScanPwr THEN getOwnerColor(:idPlayer, idPlayer) ELSE NULL END as overlayColorOwner,
 				    CASE WHEN level >= :level4InfoScanPwr THEN CASE WHEN refuelInc > 0 THEN 1 ELSE 0 END ELSE NULL END as hasRefuel,
 					CASE WHEN level >= :level4InfoScanPwr THEN shield ELSE NULL END as shield,
 					CASE WHEN level >= :level4InfoScanPwr THEN -1 ELSE NULL END as prevShield,
@@ -175,9 +190,9 @@
 			//ToDo level5
 
 			foreach ( $planets as $planet ) {
-				$result['systems'][$planet['idSystem']]['planets'][] = $planet;
+				$systems[$systemsIndexes[$planet['idSystem']]]['planets'][] = $planet;
 			}
-
+			$result['systems'] = $systems;
 			$result['scanners'] = $this->getScannersMap( $idPlayer );
 			return $result;
 /*
