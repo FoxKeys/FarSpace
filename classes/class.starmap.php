@@ -6,6 +6,7 @@
 	 */
 	class starMap {
 		const TABLE_NAME = 'starmap_systems';
+
 		public function build() {
 			//
 		}
