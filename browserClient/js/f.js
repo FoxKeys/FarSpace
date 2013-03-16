@@ -5,6 +5,25 @@
  * Time: 10:27
  * To change this template use File | Settings | File Templates.
  */
+
+function FarSpaceConst() {
+    "use strict";
+    this.OVERLAY_OWNER = "owner";
+    this.OVERLAY_DIPLO = "diplomacy";
+    this.OVERLAY_BIO = "bio";
+    this.OVERLAY_FAME = "fame";
+    this.OVERLAY_MIN = "min";
+    this.OVERLAY_SLOT = "slot";
+    this.OVERLAY_STARGATE = "stargate";
+    this.OVERLAY_DOCK = "dock";
+    this.OVERLAY_MORALE = "morale";
+    this.OVERLAY_PIRATECOLONYCOST = "piratecolony";
+    this.OVERLAY_TYPES = [this.OVERLAY_OWNER, this.OVERLAY_DIPLO, this.OVERLAY_BIO, this.OVERLAY_FAME, this.OVERLAY_MIN, this.OVERLAY_SLOT, this.OVERLAY_STARGATE, this.OVERLAY_DOCK, this.OVERLAY_MORALE, this.OVERLAY_PIRATECOLONYCOST];
+    this.overlayColorColumns = {};
+    this.overlayColorColumns[this.OVERLAY_OWNER] = 'overlayColorOwner';
+    this.overlayColorColumns[this.OVERLAY_DIPLO] = 'overlayColorDiplomacy';
+}
+
 /*jslint browser: true, devel:true */
 /*global $, browser:true, devel:true */
 function FarSpace() {
@@ -14,6 +33,8 @@ function FarSpace() {
         host = document.location.protocol + '//' + document.location.host,
         ajaxURL = host + '/ajax.php',
         tokens = [];
+
+    this.FSConst = new FarSpaceConst();
 
     this.ajax = function (classMethod, parameters, success, withToken) {
         if (withToken) {
@@ -84,4 +105,4 @@ function FarSpace() {
 }
 
 //Global FarSpace object
-var f = new FarSpace();
+window.farSpace = new FarSpace();

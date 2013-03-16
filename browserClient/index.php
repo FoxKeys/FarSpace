@@ -26,8 +26,12 @@
 	<script src="js/jquery.mousewheel-3.1.1.js"></script>
 	<script src="js/kinetic-v4.3.3.js"></script>
 	<script src="js/f.js"></script>
+	<script src="js/class.grid.js"></script>
+	<script src="js/class.scanner.js"></script>
+	<script src="js/class.planet.js"></script>
 	<!--<script src="js/main.js"></script>-->
 	<style>
+
 		#container {
 			position: absolute;
 			top: 0;
@@ -44,17 +48,6 @@
 	<script>
 		jQuery(function($){
 			//# StarMapWidget overlays
-			const	OVERLAY_OWNER = "owner",
-					OVERLAY_DIPLO = "diplomacy",
-					OVERLAY_BIO = "bio",
-					OVERLAY_FAME = "fame",
-					OVERLAY_MIN = "min",
-					OVERLAY_SLOT = "slot",
-					OVERLAY_STARGATE = "stargate",
-					OVERLAY_DOCK = "dock",
-					OVERLAY_MORALE = "morale",
-					OVERLAY_PIRATECOLONYCOST = "piratecolony",
-					OVERLAY_TYPES = [OVERLAY_OWNER, OVERLAY_DIPLO, OVERLAY_BIO, OVERLAY_FAME, OVERLAY_MIN, OVERLAY_SLOT, OVERLAY_STARGATE, OVERLAY_DOCK, OVERLAY_MORALE, OVERLAY_PIRATECOLONYCOST];
 			const	OID_NONE = 0;
 			const	//## relations
 					REL_ENEMY_LO = 0,
@@ -82,16 +75,63 @@
 			const	MIN_SCALE = 10,
 					MAX_SCALE = 600;
             var		scale = 50,
-                    $cobntainer = $('#container'),
-                    container = $cobntainer[0],
+                    $container = $('#container'),
+                    container = $container[0],
                     scanners = [],
                     systems = [],
 					fleets = [],
                     starImages = {},
                     player = {type: T_PLAYER};
 
+			var stage = new Kinetic.Stage({
+				container: 'container',
+				width: $container.width(),
+				height: $container.height()
+			});
+			$(stage.getContent()).css('position', 'absolute');
+
+			var shapesLayer = new Kinetic.Layer({clearBeforeDraw: false});
+			var context = shapesLayer.getContext();
+			var grid = new TGrid();
+			var scanner = new TScanner();
+			var planet = new TPlanet();
+			//context.textBaseline = 'top';//ToDo
+			// coordinates
+			var currX = 15;
+			var currY = -20;
+			var rect = {top: 0, left:0, right: stage.getWidth(), width: stage.getWidth(), height: stage.getHeight(), bottom: stage.getHeight()};
+			var maxX = rect.width;
+			var maxY = rect.height;
+			var centerX = Math.round(rect.width / 2);
+			var centerY = Math.round(rect.height / 2);
+			var showScanners = true;
+			var toggleControlAreas = false;
+			var overlayMode = farSpace.FSConst.OVERLAY_OWNER;
+
+			// add the layer to the stage
+			stage.add(shapesLayer);
+			shapesLayer.beforeDraw(function(){
+				//background
+				context.fillStyle = "#000";
+				context.fillRect(0, 0, rect.width, rect.height);
+
+				//# scanners
+				//# scanner ranges and control areas
+				if (showScanners || toggleControlAreas) {
+					if (toggleControlAreas) {
+						console.log('ToDo: drawControlAreas');
+						//self.drawControlAreas();
+					}
+					else {
+						scanner.draw(scanners, context, rect, currX, currY, scale, centerX, centerY);
+					}
+				}
+
+				grid.draw(context, rect, currX, currY, scale, centerX, centerY);
+			});
+
 			// элемент #myelement обрабатывает события прокрутка колесика мышки
-            $cobntainer.mousewheel(function (event, delta) {
+            $container.mousewheel(function (event, delta) {
                 var step = Math.max(Math.round(scale / 10), 1);
                 scale += step * delta;
                 scale = Math.max(MIN_SCALE, scale);
@@ -99,15 +139,6 @@
                 paint();
             });
 
-			var stage = new Kinetic.Stage({
-				container: 'container',
-				width: window.innerWidth,
-				height: window.innerHeight - 2
-			});
-
-			var shapesLayer = new Kinetic.Layer();
-			// add the layer to the stage
-			stage.add(shapesLayer);
             function cInt(value) {
                 return parseInt(value, 10);
             }
@@ -170,8 +201,6 @@
 				shapesLayer.removeChildren();
 				//if (canvas && canvas.getContext) {
 					var self = {
-						showScanners: true,
-						toggleControlAreas: false,
 						showPirateAreas: false,
 						showRedirects: false,
 						showGateSystems: false,
@@ -181,115 +210,9 @@
 						showFleets: true,
 						showFleetLines: true,
 						showCivilianFleets: true,
-						overlayMode: OVERLAY_OWNER,
                         overlayColorColumns: {},
 						starToPointScaleThreshold: 30
 					};
-					self.overlayColorColumns[OVERLAY_OWNER] = 'overlayColorOwner';
-					self.overlayColorColumns[OVERLAY_DIPLO] = 'overlayColorDiplomacy';
-					/*var context = canvas.getContext('2d');
-					context.canvas.width  = window.innerWidth;
-					context.canvas.height = window.innerHeight;
-					context.textBaseline = 'top';*/
-					// coordinates
-					var currX = 15;
-					var currY = -20;
-					var rect = {top: 0, left:0, right: stage.getWidth(), width: stage.getWidth(), height: stage.getHeight(), bottom: stage.height};
-					var maxX = rect.width;
-					var maxY = rect.height;
-					var centerX = Math.round(rect.width / 2);
-					var centerY = Math.round(rect.height / 2);
-/*
-					var grid = {
-						showGrid: true,
-						showCoords: true,
-						coordsFontHeight: 10,
-						gridStrokeStyle1: '#000090',
-						gridStrokeStyle2: '#333366',
-						gridFontFillStyle: '#707080',
-						drawGrid: function () {
-							var value = 0;
-							var left = Math.round((Math.round(currX) - currX) * scale) + centerX - Math.round(rect.width / scale / 2) * scale;
-							var x = 0.5 + left;	//Half-pixel shift
-							context.lineWidth = 1;
-							context.font = grid.coordsFontHeight + "px Arial";
-							context.fillStyle = grid.gridFontFillStyle;
-							while (x < left + rect.width + scale) {
-								value = Math.floor((x - centerX) / scale + currX);
-
-								context.strokeStyle = (value % 5 == 0) ? grid.gridStrokeStyle1 : grid.gridStrokeStyle2;
-								context.beginPath();
-								context.moveTo(x, rect.top);
-								context.lineTo(x, rect.bottom);
-								context.stroke();
-
-                                if (grid.showCoords && value % 5 == 0) {
-									context.fillText(value, x + 2, rect.height - grid.coordsFontHeight);
-                                }
-
-								x += scale;
-							}
-							var top = Math.round((Math.round(currY) - currY) * scale) + centerY - Math.round(rect.height / scale / 2) * scale;
-							var y = 0.5 + top,	//Half-pixel shift
-								yScreen;
-							while (y < top + rect.height + scale) {
-								yScreen = maxY - y;
-								value = Math.floor(((maxY - yScreen) - centerY) / scale + currY);
-
-								context.strokeStyle = (value % 5 == 0) ? grid.gridStrokeStyle1 : grid.gridStrokeStyle2;
-								context.beginPath();
-								context.moveTo(rect.left, yScreen);
-								context.lineTo(rect.right, yScreen);
-								context.stroke();
-
-                                if (grid.showCoords && value % 5 == 0) {
-									context.fillText(value, 0, yScreen);
-                                }
-
-								y += scale;
-							}
-						}
-					};
-
-                    var scannerPainter = {
-                        //# default scanner ranges (inner and outer circles)
-                        scanner1range: 1.0 / 10,
-                        scanner2range: 1.0 / 16,
-                        draw: function (scanners) {
-                            //# coordinates
-                            var scannerCalced = [];
-                            //# draw
-                            context.lineWidth = 1;
-                            $.each(scanners, function (index, scanner) {
-                                var sx = Math.round((scanner.x - currX) * scale) + centerX;
-                                var sy = maxY - (Math.round((scanner.y - currY) * scale) + centerY);
-                                var currRange = Math.round(scanner.scannerPwr * scale * scannerPainter.scanner1range + 2);
-                                var range1 = Math.round(scanner.scannerPwr * scale * scannerPainter.scanner1range);
-                                var range2 = Math.round(scanner.scannerPwr * scale * scannerPainter.scanner2range);
-                                if (sx + currRange > 0 && sx - currRange < maxX && sy + currRange > 0 && sy - currRange < maxY) {
-                                    context.beginPath();
-                                    context.arc(sx, sy, currRange, 0, 2 * Math.PI, false);
-                                    context.fillStyle = '#000060';
-                                    context.fill();
-                                    context.strokeStyle = '#000060';
-                                    context.stroke();
-                                    scannerCalced.push({sx: sx, sy: sy, range1: range1, range2: range2});
-                                }
-                            });
-                            $.each(scannerCalced, function (index, info) {
-                                context.beginPath();
-                                context.arc(info.sx, info.sy, info.range1, 0, 2 * Math.PI, false);
-                                context.fillStyle = '#000030';
-                                context.fill();
-                            });
-                            $.each(scannerCalced, function (index, info) {
-                                context.beginPath();
-                                context.arc(info.sx, info.sy, info.range2, 0, 2 * Math.PI, false);
-                                context.fillStyle = '#000040';
-                                context.fill();
-                            });
-                        }
-                    };
 
                     var systemsPainter = {
 						nameFontHeight: 11,
@@ -306,14 +229,17 @@
                             $.each(systems, function (index, system) {//for objID, x, y, name, img, color, namecolor, singlet, icons in self._map[self.MAP_SYSTEMS]:
                                 var sx = cInt((system.x - currX) * scale) + centerX;
                                 var sy = maxY - (cInt((system.y - currY) * scale) + centerY);
+
+								planet.draw(system, sx, sy, overlayMode, shapesLayer, rect, currX, currY, scale );
+
 								var textY = sy + Math.round( systemsPainter.starHeight / 2 );
                                 var colors = {}, total = 0, delta = null;
                                 if (system.planets) {
                                     $.each(system.planets, function (index, planet) {
                                         var colorIndex;
-                                        if (planet.idPlayer && planet[self.overlayColorColumns[self.overlayMode]]) {
+                                        if (planet.idPlayer && planet[self.overlayColorColumns[overlayMode]]) {
                                             total++;
-                                            colorIndex = planet[self.overlayColorColumns[self.overlayMode]];
+                                            colorIndex = planet[self.overlayColorColumns[overlayMode]];
                                             colors[colorIndex] = (colors[colorIndex]) ? colors[colorIndex] + 1 : 1;
                                         }
                                     });
@@ -337,7 +263,7 @@
                                     w = 22;
                                     h = 22;
                                     if (system.name) {
-                                        if (self.overlayMode != OVERLAY_OWNER) {
+                                        if (overlayMode != farSpace.FSConst.OVERLAY_OWNER) {
                                             context.fillStyle = res.fadeColor(nameColor);
                                         } else {
                                             context.fillStyle = nameColor;
@@ -347,7 +273,7 @@
                                     //buoy = self.getBuoy(objID)
                                     if (system.buoy) {//ToDo how to?
 										/*if not name: #if name not set and there is a bouy, set "?" as the name
-											if self.overlayMode != gdata.OVERLAY_OWNER:
+											if overlayMode != gdata.OVERLAY_OWNER:
 												namecolor = res.fadeColor(namecolor)
 											img = renderText('small', '[ ? ]', 1, namecolor)
 											self._mapSurf.blit(img, (sx - img.get_width() / 2, sy + h / 2))
@@ -361,7 +287,7 @@
 												break
 											if len(line) > MAX_BOUY_DISPLAY_LEN:
 												line = u"%s..." % line[:MAX_BOUY_DISPLAY_LEN]
-											if self.overlayMode == gdata.OVERLAY_OWNER:
+											if overlayMode == gdata.OVERLAY_OWNER:
 												bouycolor = buoyColors[buoy[1] - 1]
 											else:
 												bouycolor = res.fadeColor(buoyColors[buoy[1] - 1])
@@ -385,9 +311,9 @@
 									/*var actRect = Rect(sx - w / 2, sy - h / 2, w, h)
 									actRect.move_ip(self.rect.left, self.rect.top)
 									self._actAreas[objID] = actRect*/
-/*                                } else {
+                                } else {
 									starRadius = Math.round( systemsPainter.starToCircleRadius * scale / self.starToPointScaleThreshold );
-                                    if ((self.overlayMode == OVERLAY_OWNER || self.overlayMode == OVERLAY_DIPLO) && system.planets) {
+                                    if ((overlayMode == farSpace.FSConst.OVERLAY_OWNER || overlayMode == farSpace.FSConst.OVERLAY_DIPLO) && system.planets) {
                                         var angle = -Math.PI / 4;
 
 										delta = 2 * Math.PI / total;
@@ -407,7 +333,7 @@
                                             angle += (delta * count);
                                         });
                                     } else {
-                                        color = system[self.overlayColorColumns[self.overlayMode]];
+                                        color = system[self.overlayColorColumns[overlayMode]];
                                         context.beginPath();
                                         context.arc(sx, sy, starRadius, 0, 2 * Math.PI, false);
                                         context.fillStyle = '#' + color;
@@ -419,7 +345,7 @@
 										var start = 0;
 										delta = 1 / total;
                                         $.each(colors, function (color, count) {
-                                            if (self.overlayMode != OVERLAY_OWNER) {
+                                            if (overlayMode != farSpace.FSConst.OVERLAY_OWNER) {
                                                 color = res.fadeColor(color)
                                             }
                                             grd.addColorStop(start, '#' + color);
@@ -452,47 +378,13 @@
 									/*actRect = Rect(sx - 6 / 2, sy - 6 / 2, 6, 6)
 									actRect.move_ip(self.rect.left, self.rect.top)
 									self._actAreas[objID] = actRect*/
-/*                                }
-                            })
-                        }
-                    };*/
-					var planetPainter = {
-						minPlanetSymbolSize: 2,
-						maxPlanetSymbolSize: 22,
-						draw: function () {
-							if(scale > 20){
-								$.each(systems, function (index, system) {//for objID, x, y, name, img, color, namecolor, singlet, icons in self._map[self.MAP_SYSTEMS]:
-									if (system.planets) {
-										var sx = cInt((system.x - currX) * scale) + centerX;
-										var sy = maxY - (cInt((system.y - currY) * scale) + centerY);
-										//# coordinates
-										var rectSize = Math.max(planetPainter.minPlanetSymbolSize, Math.floor(scale / 6));
-										if (planetPainter.maxPlanetSymbolSize != 0) {
-											rectSize = Math.min(planetPainter.maxPlanetSymbolSize, rectSize);
-										}
-										var rectSpace = rectSize + Math.max(1, Math.round(rectSize / 5));
-										$.each(system.planets, function (index, planet) {	//for objID, x, y, orbit, color, singlet in self._map[self.MAP_PLANETS]:
-											/*if not singlet:
-											 color = color[self.overlayMode]*/
-											//orbit -= 1;
-											var rect = new Kinetic.Rect({
-												x: sx + (index % 8) * rectSpace + 13,
-												y: sy - rectSize,
-												width: rectSize,
-												height: rectSize,
-												fill: '#' + planet[self.overlayColorColumns[self.overlayMode]]
-											});
-											// add the shape to the layer
-											rect.on('click', function () {
-												console.log(this);
-											});
-											shapesLayer.add(rect);
-										});
-									}
-								});
-							}
-						}
-					};
+                                	}
+								}
+                            }
+                        })
+                    }
+					}
+
 /*					var fleetPainter = {
 						minFleetSymbolSize: 4,
 						maxFleetSymbolSize: 22,
@@ -529,7 +421,7 @@
 							for objID, x, y, oldX, oldY, orbit, eta, color, size, military in self._map[self.MAP_FLEETS]:
 								if not self.showCivilianFleets and not military:
 									continue
-								if self.overlayMode != gdata.OVERLAY_OWNER:
+								if overlayMode != gdata.OVERLAY_OWNER:
 									color = res.fadeColor(color)
 								sx = int((x - currX) * scale) + centerX
 								sy = maxY - (int((y - currY) * scale) + centerY)
@@ -562,31 +454,13 @@
 										self._mapSurf.blit(img, actRect.topright)
 							*/
 /*						}
-					};
-					//Bkg
-					context.fillStyle = "#000";
-					context.fillRect(0, 0, rect.width, rect.height);
+					};*/
 
-					//# scanners
-					//# scanner ranges and control areas
-                    if (self.showScanners || self.toggleControlAreas) {
-                        if (self.toggleControlAreas) {
-                            console.log('ToDo: drawControlAreas');
-                            //self.drawControlAreas();
-                        }
-                        else {
-                            scannerPainter.draw(scanners);
-                        }
-                    }
                     //# pirate area
                     if (self.showPirateAreas) {
                         console.log('ToDo: showPirateAreas');
                     }
-					//# grid
-                    if (grid.showGrid) {
-						grid.drawGrid();
-					}
-					//# redirections
+/*					//# redirections
                     if (self.showRedirects) {
                         console.log('ToDo: drawRedirects');
                         //self.drawRedirects();
@@ -604,15 +478,15 @@
 						}else{
 							self.drawGateNetworks(self.showGateNetworks)
 						}*/
-/*					}
+/*					}*/
 					//# stars
                     if (self.showSystems) {
                         systemsPainter.draw();
-                    }*/
+                    }
 					//# planets
-					if (self.showPlanets) {
-						planetPainter.draw();
-					}
+					/*if (self.showPlanets) {
+						planet.draw(systems, shapesLayer);
+					}*/
 /*					//# fleets
 					if (self.showFleets) {
 						fleetPainter.draw();
@@ -624,7 +498,7 @@
 
 
 				//}
-				stage.draw();
+				shapesLayer.draw();
 			}
 
 			paint();
