@@ -5,6 +5,7 @@
 	 * Date Time: 06.02.2013 8:46
 	 */
 	class planetType extends activeRecord {
+		const TABLE_NAME = 'planet_types';
 		/**
 		 * @var string idPlanetType
 		 */

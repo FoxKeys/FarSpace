@@ -22,6 +22,8 @@ function FarSpaceConst() {
     this.overlayColorColumns = {};
     this.overlayColorColumns[this.OVERLAY_OWNER] = 'overlayColorOwner';
     this.overlayColorColumns[this.OVERLAY_DIPLO] = 'overlayColorDiplomacy';
+    this.defaultScale = 50;
+    this.starSize = 40;
 }
 
 /*jslint browser: true, devel:true */
@@ -35,6 +37,17 @@ function FarSpace() {
         tokens = [];
 
     this.FSConst = new FarSpaceConst();
+
+    this.cInt = function (value) {
+        return parseInt(value, 10);
+    };
+
+    this.fadeColor = function (hex) {
+        var r = Math.round((parseInt(hex.substr(1, 2), 16) + 0xc0) / 2),
+            g = Math.round((parseInt(hex.substr(3, 2), 16) + 0xc0) / 2),
+            b = Math.round((parseInt(hex.substr(4, 2), 16) + 0xc0) / 2);
+        return '#' + r.toString(16) + g.toString(16) + b.toString(16);
+    };
 
     this.ajax = function (classMethod, parameters, success, withToken) {
         if (withToken) {

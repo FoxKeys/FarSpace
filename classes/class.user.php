@@ -6,7 +6,7 @@
 	 */
 
 	class user extends activeRecord {
-		const USERS_TABLE_NAME = 'users';
+		const TABLE_NAME = 'users';
 
 		/**
 		 * @param int $idUser
@@ -14,7 +14,7 @@
 		 * @return user
 		 */
 		public function load( $idUser ) {
-			$data = game::DB()->selectRow( 'SELECT * FROM ' . self::USERS_TABLE_NAME . ' WHERE idUser = ?', $idUser );
+			$data = game::DB()->selectRow( 'SELECT * FROM ' . self::TABLE_NAME . ' WHERE idUser = ?', $idUser );
 			if ( empty( $data ) ) {
 				throw new Exception( sprintf( fConst::E_NOT_FOUND, __CLASS__, $idUser ) );
 			}
@@ -36,7 +36,7 @@
 					throw new Exception( sprintf( fConst::E_ACCESS_DENIED, __CLASS__, $idUser ) );
 				}
 				game::DB()->exec(
-					'UPDATE ' . $this::USERS_TABLE_NAME . ' SET galaxyCreateLimit = :galaxyCreateLimit WHERE idUser = :idUser',
+					'UPDATE ' . $this::TABLE_NAME . ' SET galaxyCreateLimit = :galaxyCreateLimit WHERE idUser = :idUser',
 					array( ':galaxyCreateLimit' => $this->galaxyCreateLimit() ),
 					array( ':idUser' => $this->idUser() )
 				);

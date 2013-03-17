@@ -104,7 +104,7 @@
 
 			$result = array();
 			$systems = game::DB()->select('
-				SELECT	sm.level,
+				SELECT	cast(sm.level as DECIMAL (10,1)) as level,
 						sm.idSystem,
 						s.x,
 						s.y,
@@ -128,21 +128,24 @@
 			}
 			$planets = game::DB()->select('
 				SELECT
-				    level,
+				    cast(level as DECIMAL (10,1)) as level,
 				    idSystem,
 				    idPlanet,
 				    signature,
 				    idPlanetType,
+				    namePlanetType,
 				    CASE WHEN level >= :level2InfoScanPwr THEN plDiameter ELSE NULL END as plDiameter,
 				    CASE WHEN level >= :level2InfoScanPwr THEN CASE WHEN idPlanetType = "G" THEN NULL ELSE plMin END ELSE NULL END as plMin,
 				    CASE WHEN level >= :level2InfoScanPwr THEN plBio ELSE NULL END as plBio,
 				    CASE WHEN level >= :level2InfoScanPwr THEN plEn ELSE NULL END as plEn,
 				    CASE WHEN level >= :level2InfoScanPwr THEN plSlots ELSE NULL END as plSlots,
 				    CASE WHEN level >= :level2InfoScanPwr THEN idStratRes ELSE NULL END as idStratRes,
+				    CASE WHEN level >= :level2InfoScanPwr THEN nameStratRes ELSE NULL END as nameStratRes,
 				    CASE WHEN level >= :level2InfoScanPwr THEN plMaxSlots ELSE NULL END as plMaxSlots,
 				    CASE WHEN level >= :level3InfoScanPwr THEN name ELSE NULL END as name,
 				    CASE WHEN level >= :level3InfoScanPwr THEN storPop ELSE NULL END as storPop,
 				    CASE WHEN level >= :level3InfoScanPwr THEN idPlayer ELSE NULL END as idPlayer,
+				    CASE WHEN level >= :level3InfoScanPwr THEN login ELSE NULL END as userName,
 				    CASE WHEN level >= :level3InfoScanPwr THEN getOwnerColor(:idPlayer, idPlayer) ELSE NULL END as overlayColorOwner,
 				    CASE WHEN level >= :level4InfoScanPwr THEN CASE WHEN refuelInc > 0 THEN 1 ELSE 0 END ELSE NULL END as hasRefuel,
 					CASE WHEN level >= :level4InfoScanPwr THEN shield ELSE NULL END as shield,
@@ -166,11 +169,85 @@
 								p.name,
 								p.storPop,
 								p.idPlayer,
+								u.login,
 								(SELECT MAX(refuelInc * techEff( pt.level ) /* ToDo opStatus*/) FROM ' . structure::TABLE_NAME . ' s INNER JOIN ' . playerTech::TABLE_NAME . ' pt ON s.idTech = pt.idTech INNER JOIN ' . tech::TABLE_NAME . ' t ON s.idTech = t.idTech WHERE s.idPlanet = p.idPlanet AND pt.idPlayer = p.idPlayer) as refuelInc,
-								p.shield
+								p.shield,
+								sr.nameStratRes,
+								pt.namePlanetType
 						FROM	' . self::TABLE_NAME_STATIC_MAP . ' sm
 								INNER JOIN ' . planet::TABLE_NAME . ' p ON sm.idSystem = p.idSystem
 								INNER JOIN ' . system::TABLE_NAME . ' s ON sm.idSystem = s.idSystem
+								LEFT OUTER JOIN ' . player::TABLE_NAME . ' plr ON p.idPlayer = plr.idPlayer
+								LEFT OUTER JOIN ' . user::TABLE_NAME . ' u ON plr.idUser = u.idUser
+								LEFT OUTER JOIN ' . stratRes::TABLE_NAME . ' sr ON p.idStratRes = sr.idStratRes
+								LEFT OUTER JOIN ' . planetType::TABLE_NAME . ' pt ON p.idPlanetType = pt.idPlanetType
+						WHERE	sm.idPlayer = :idPlayer
+								AND (sm.level * p.signature / s.signature) >= :level1InfoScanPwr
+						ORDER BY	s.idSystem, p.plEn
+					) t',
+				array(
+					'idPlayer' => $idPlayer,
+					'level1InfoScanPwr' => rules::$level1InfoScanPwr,
+					'level2InfoScanPwr' => rules::$level2InfoScanPwr,
+					'level3InfoScanPwr' => rules::$level3InfoScanPwr,
+					'level4InfoScanPwr' => rules::$level4InfoScanPwr
+				)
+			);
+			$planets = game::DB()->select('
+				SELECT
+				    cast(level as DECIMAL (10,1)) as level,
+				    idSystem,
+				    idPlanet,
+				    signature,
+				    idPlanetType,
+				    namePlanetType,
+				    CASE WHEN level >= :level2InfoScanPwr THEN plDiameter ELSE NULL END as plDiameter,
+				    CASE WHEN level >= :level2InfoScanPwr THEN CASE WHEN idPlanetType = "G" THEN NULL ELSE plMin END ELSE NULL END as plMin,
+				    CASE WHEN level >= :level2InfoScanPwr THEN plBio ELSE NULL END as plBio,
+				    CASE WHEN level >= :level2InfoScanPwr THEN plEn ELSE NULL END as plEn,
+				    CASE WHEN level >= :level2InfoScanPwr THEN plSlots ELSE NULL END as plSlots,
+				    CASE WHEN level >= :level2InfoScanPwr THEN idStratRes ELSE NULL END as idStratRes,
+				    CASE WHEN level >= :level2InfoScanPwr THEN nameStratRes ELSE NULL END as nameStratRes,
+				    CASE WHEN level >= :level2InfoScanPwr THEN plMaxSlots ELSE NULL END as plMaxSlots,
+				    CASE WHEN level >= :level3InfoScanPwr THEN name ELSE NULL END as name,
+				    CASE WHEN level >= :level3InfoScanPwr THEN storPop ELSE NULL END as storPop,
+				    CASE WHEN level >= :level3InfoScanPwr THEN idPlayer ELSE NULL END as idPlayer,
+				    CASE WHEN level >= :level3InfoScanPwr THEN login ELSE NULL END as userName,
+				    CASE WHEN level >= :level3InfoScanPwr THEN getOwnerColor(:idPlayer, idPlayer) ELSE NULL END as overlayColorOwner,
+				    CASE WHEN level >= :level4InfoScanPwr THEN CASE WHEN refuelInc > 0 THEN 1 ELSE 0 END ELSE NULL END as hasRefuel,
+					CASE WHEN level >= :level4InfoScanPwr THEN shield ELSE NULL END as shield,
+					CASE WHEN level >= :level4InfoScanPwr THEN -1 ELSE NULL END as prevShield,
+					CASE WHEN level >= :level4InfoScanPwr THEN -1 ELSE NULL END as maxShield
+				FROM
+					(
+						SELECT	(sm.level * p.signature / s.signature) as level,
+								s.idSystem,
+								p.idPlanet,
+								p.signature,
+								-- p.orbit,
+								p.idPlanetType,
+								p.plDiameter,
+								p.plMin,
+								p.plBio,
+								p.plEn,
+								p.plSlots,
+								p.idStratRes,
+								p.plMaxSlots,
+								p.name,
+								p.storPop,
+								p.idPlayer,
+								u.login,
+								(SELECT MAX(refuelInc * techEff( pt.level ) /* ToDo opStatus*/) FROM ' . structure::TABLE_NAME . ' s INNER JOIN ' . playerTech::TABLE_NAME . ' pt ON s.idTech = pt.idTech INNER JOIN ' . tech::TABLE_NAME . ' t ON s.idTech = t.idTech WHERE s.idPlanet = p.idPlanet AND pt.idPlayer = p.idPlayer) as refuelInc,
+								p.shield,
+								sr.nameStratRes,
+								pt.namePlanetType
+						FROM	' . self::TABLE_NAME_STATIC_MAP . ' sm
+								INNER JOIN ' . planet::TABLE_NAME . ' p ON sm.idSystem = p.idSystem
+								INNER JOIN ' . system::TABLE_NAME . ' s ON sm.idSystem = s.idSystem
+								LEFT OUTER JOIN ' . player::TABLE_NAME . ' plr ON p.idPlayer = plr.idPlayer
+								LEFT OUTER JOIN ' . user::TABLE_NAME . ' u ON plr.idUser = u.idUser
+								LEFT OUTER JOIN ' . stratRes::TABLE_NAME . ' sr ON p.idStratRes = sr.idStratRes
+								LEFT OUTER JOIN ' . planetType::TABLE_NAME . ' pt ON p.idPlanetType = pt.idPlanetType
 						WHERE	sm.idPlayer = :idPlayer
 								AND (sm.level * p.signature / s.signature) >= :level1InfoScanPwr
 						ORDER BY	s.idSystem, p.plEn
