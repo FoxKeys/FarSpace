@@ -14,7 +14,7 @@ function TSystemRenderer() {
         noOwnerBkgColor = 'c0c0c0',
         starToCircleRadius = 4,
         starToPointScaleThreshold = 30;
-    self.hintAttr = {idSystem: 'Id', level: 'Radar level', userName: 'Owner'};
+    self.hintAttr = {idSystem: 'Id', level: 'Radar level', userName: 'Owner', hasRefuel: 'Has refuel', refuelInc: 'Refuel inc (%)', refuelMax: 'Refuel max (%)' };
 
     self.draw = function (systems, planet, overlayMode, context, shapesLayer, rect, currX, currY, scale, centerX, centerY) {
         //# coordinates

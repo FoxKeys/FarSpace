@@ -8,3 +8,112 @@ fieldset label {
     text-align: right;
     margin-right: 4px;
 }
+#farSpace .ui-dialog, #farSpace .ui-widget-content {
+    background-color: #313A5F;
+    background-image: none;
+}
+
+#farSpace .system-dialog.ui-dialog-content {
+    padding: 5px 0 0 0;
+}
+
+
+#farSpace .ui-widget-overlay {
+    background: none repeat-x scroll 50% 50% #000000;
+    opacity: 0.3;
+}
+
+.system-dialog .images {
+    background-color: #000000;
+    background-repeat: no-repeat;
+    display: table-cell;
+    height: 200px;
+    padding: 0 0 0 100px;
+    vertical-align: middle;
+    width: 700px;
+}
+
+.system-dialog .images.starClass- {
+    background-image: url('../img/system/star_-.png');
+}
+
+.system-dialog .images.starClassA {
+    background-image: url('../img/system/star_A.png');
+}
+
+.system-dialog .images.starClassB {
+    background-image: url('../img/system/star_B.png');
+}
+
+.system-dialog .images.starClassF {
+    background-image: url('../img/system/star_F.png');
+}
+
+.system-dialog .images.starClassG {
+    background-image: url('../img/system/star_G.png');
+}
+
+.system-dialog .images.starClassK {
+    background-image: url('../img/system/star_K.png');
+}
+
+.system-dialog .images.starClassM {
+    background-image: url('../img/system/star_M.png');
+}
+
+.system-dialog .images.starClassO {
+    background-image: url('../img/system/star_O.png');
+}
+
+.system-dialog .images.starClassW {
+    background-image: url('../img/system/star_W.png');
+}
+
+.system-dialog .images .planet {
+    margin: 0 20px 0 0;
+    vertical-align: middle;
+    padding: 10px;
+}
+
+.system-dialog .images .planet.selected {
+    border-radius: 10px;
+    box-shadow: inset 0 0 10px #0000AA;
+    padding: 10px;
+}
+
+.system-dialog .dataColumn {
+    width: 400px;
+    float: left;
+    font-size: 14px;
+    font-family: helvetica;
+}
+
+.system-dialog .dataColumn h3 {
+    display: inline-block;
+    padding: 2px;
+    margin: 0 0 5px;
+    width: 396px;
+    background-image: url("../img/bg-lines.png");
+    background-repeat: repeat;
+    text-shadow: 1px 1px 1px rgba(125, 125, 125, 0.40);
+    font-weight: bold;
+    color: #FFFFFF;
+}
+
+.system-dialog .dataColumn dl {
+    color: #DDDDDD;
+    text-shadow: 1px 1px 1px rgba(125, 125, 125, 0.40);
+}
+
+.system-dialog .dataColumn dt {
+    width: 130px;
+    float: left;
+    margin: 5px 0;
+}
+
+.system-dialog .dataColumn dd {
+    width: 66px;
+    float: left;
+    text-align: right;
+    margin: 5px 4px 5px 0;
+}

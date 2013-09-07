@@ -57,8 +57,9 @@
 		}
 	</style>
 </head>
-<body>
+<body id="farSpace">
 	<?php //require_once( 'dialogs/login.php' );?>
+	<?php require_once( 'dialogs/system.php' );?>
 	<div id="container"></div>
 	<div id="hint"></div>
 	<script>
@@ -280,21 +281,15 @@
 						system.icons = [];
 						system.image = imageCache.get('img/systems/star_' + system.starClass + '.png');
 						if (system.refuelMax > 0) {
-							if(refuelMax >= 87){
+							if (system.refuelMax >= 87) {
 								system.icons.push(imageCache.get('img/icons/fuel_99.png'));
+							} else if (system.refuelMax >= 62) {
+								system.icons.push(imageCache.get('img/icons/fuel_75.png'));
+							} else if (system.refuelMax >= 37) {
+								system.icons.push(imageCache.get('img/icons/fuel_50.png'));
+							} else if (system.refuelMax >= 12) {
+								system.icons.push(imageCache.get('img/icons/fuel_25.png'));
 							}
-							/*elif
-							refuelMax >= 62
-						:
-							icons.append(res.icons["fuel_75"])
-							elif
-							refuelMax >= 37
-						:
-							icons.append(res.icons["fuel_50"])
-							elif
-							refuelMax >= 12
-						:*/
-							system.icons.push(imageCache.get('img/icons/fuel_25.png'));
 						} else if (system.hasRefuel) {
 							system.icons.push(imageCache.get('img/icons/fuel_-.png'));
 						}
@@ -329,15 +324,25 @@
 				});
 				$hint.show();
 			});
-			$(document).on('planetLeave.FS systemLeave.FS', function(event, planet){
+			$(document).on('planetLeave.FS systemLeave.FS', function(event, system, planet){
 				$hint.hide();
 			});
-			$(document).on('planetMove.FS systemMove.FS', function(event, planet){
+			$(document).on('planetMove.FS systemMove.FS', function(event, system, planet){
 				var mousePos = stage.getMousePosition();
 				$hint.css({
 					left: mousePos.x + 15,
 					top: mousePos.y
 				});
+			});
+
+			$(document).on('systemClick.FS', function (event, system) {
+				console.log(system);
+				$(document).trigger("show.systemDialog.FS", system, null );
+			});
+
+			$(document).on('planetClick.FS', function (event, system, planet) {
+				console.log(system, planet);
+				$(document).trigger("show.systemDialog.FS", system, planet );
 			});
 		});
 

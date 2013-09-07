@@ -6,6 +6,7 @@
 	 */
 	class fleet extends activeRecord {
 		const TABLE_NAME = 'fleets';
+		const TABLE_FLEETS_POSITIONS = 'fleets_positions';
 
 		/**
 		 * @param int|null $idPlayer

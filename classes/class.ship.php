@@ -34,7 +34,7 @@
 					$this->idFleet(),
 					$this->idShipDesign(),
 					$this->HP(),
-					$this->shield(),
+					$this->shieldHP(),
 					$this->experience()
 				);
 				$this->idShip( game::DB()->lastInsertId() );
@@ -99,7 +99,7 @@
 		 * @param float $value
 		 * @return float
 		 */
-		public function shield( $value = null ) {
+		public function shieldHP( $value = null ) {
 			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
 		}
 

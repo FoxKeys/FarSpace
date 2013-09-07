@@ -12,7 +12,7 @@ function TPlanetRenderer() {
     var self = this,
         minPlanetSymbolSize = 2,
         maxPlanetSymbolSize = 22;
-    self.hintAttr = {idPlanet: 'Id', level: 'Radar level', namePlanetType: 'Type', name: 'Name', plBio: 'Environment', plMin: 'Minerals', plEn: 'Energy', plSlots: 'Slots', nameStratRes: 'Strat. resource', userName: 'Owner'};
+    self.hintAttr = {idPlanet: 'Id', level: 'Radar level', namePlanetType: 'Type', name: 'Name', plBio: 'Environment', plMin: 'Minerals', plEn: 'Energy', plSlots: 'Slots', nameStratRes: 'Strat. resource', userName: 'Owner', hasRefuel: 'Has refuel', refuelInc: 'Refuel inc (%)', refuelMax: 'Refuel max (%)'};
 
     self.draw = function (system, sx, sy, overlayMode, shapesLayer, rect, currX, currY, scale) {
         if (scale > 20) {
@@ -34,16 +34,16 @@ function TPlanetRenderer() {
                     });
                     //Setup events
                     rect.on('click', function () {
-                        $(document).trigger("planetClick.FS", planet);
+                        $(document).trigger("planetClick.FS", system, planet);
                     });
                     rect.on('mousemove', function () {
-                        $(document).trigger("planetMove.FS", planet);
+                        $(document).trigger("planetMove.FS", system, planet);
                     });
                     rect.on('mouseenter', function () {
-                        $(document).trigger("planetEnter.FS", planet);
+                        $(document).trigger("planetEnter.FS", system, planet);
                     });
                     rect.on('mouseleave', function () {
-                        $(document).trigger("planetLeave.FS", planet);
+                        $(document).trigger("planetLeave.FS", system, planet);
                     });
                     // add the shape to the layer
                     shapesLayer.add(rect);

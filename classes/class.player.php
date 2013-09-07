@@ -176,11 +176,11 @@
 				log::debug( sprintf( 'Creating fleet - created %d', $fleet->idFleet() ) );
 
 				log::debug( 'Creating fleet - addShips' );
-				$fleet->addShip( ship::createNew( $fleet->idFleet(), $scoutDesign->idShipDesign(), $scoutDesign->HP(), $scoutDesign->shield(), 0 )->save(), $scoutDesign->storEn() );
-				$fleet->addShip( ship::createNew( $fleet->idFleet(), $scoutDesign->idShipDesign(), $scoutDesign->HP(), $scoutDesign->shield(), 0 )->save(), $scoutDesign->storEn() );
-				$fleet->addShip( ship::createNew( $fleet->idFleet(), $fighterDesign->idShipDesign(), $fighterDesign->HP(), $fighterDesign->shield(), 0 )->save(), $fighterDesign->storEn() );
-				$fleet->addShip( ship::createNew( $fleet->idFleet(), $fighterDesign->idShipDesign(), $fighterDesign->HP(), $fighterDesign->shield(), 0 )->save(), $fighterDesign->storEn() );
-				$fleet->addShip( ship::createNew( $fleet->idFleet(), $colonyDesign->idShipDesign(), $colonyDesign->HP(), $colonyDesign->shield(), 0 )->save(), $colonyDesign->storEn() );
+				$fleet->addShip( ship::createNew( $fleet->idFleet(), $scoutDesign->idShipDesign(), $scoutDesign->HP(), $scoutDesign->shieldHP(), 0 )->save(), $scoutDesign->storEn() );
+				$fleet->addShip( ship::createNew( $fleet->idFleet(), $scoutDesign->idShipDesign(), $scoutDesign->HP(), $scoutDesign->shieldHP(), 0 )->save(), $scoutDesign->storEn() );
+				$fleet->addShip( ship::createNew( $fleet->idFleet(), $fighterDesign->idShipDesign(), $fighterDesign->HP(), $fighterDesign->shieldHP(), 0 )->save(), $fighterDesign->storEn() );
+				$fleet->addShip( ship::createNew( $fleet->idFleet(), $fighterDesign->idShipDesign(), $fighterDesign->HP(), $fighterDesign->shieldHP(), 0 )->save(), $fighterDesign->storEn() );
+				$fleet->addShip( ship::createNew( $fleet->idFleet(), $colonyDesign->idShipDesign(), $colonyDesign->HP(), $colonyDesign->shieldHP(), 0 )->save(), $colonyDesign->storEn() );
 				$fleet->save();
 
 				# initial scan

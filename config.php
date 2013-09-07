@@ -6,7 +6,7 @@
 	 */
 
 	class config{
-		public static $DB = array( 'DSN' => 'mysql:host=localhost;dbname=fox_ospace;charset=utf8', 'username' => 'fox_ospace', 'password' => 'b3qkcb3qkc' );
+		public static $DB = array( 'DSN' => 'mysql:host=localhost;dbname=fox_ospace;charset=utf8', 'username' => 'fox_ospace', 'password' => 'TPN@J1vLyfd2+tA;' );
 		public static $ClientVersion = array(
 			'version' => array( 0, 0, 0, "" ),
 			'build' => 0,

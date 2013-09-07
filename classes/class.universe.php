@@ -526,8 +526,7 @@
 				$planet->plEnv( 0 );
 			}
 			# slots
-			$slotsMod = 0.67;
-			$planet->plMaxSlots( round( ( $planet->plDiameter() / 1000 ) * 1.5 * $slotsMod ) );
+			$planet->plMaxSlots( round( $planet->plDiameter() / 1000 / ( $planet->idPlanetType() == 'G' ? 10 : 1 ) ) );
 			if ( $planet->idPlanetType() == 'E' ) {
 				$planet->plSlots( 9 );
 				# $planet->slots = round($planet->maxSlots * 0.50)

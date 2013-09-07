@@ -125,14 +125,25 @@
 		 *
 		 */
 		private function calcSummary(){
-			$this->summary = game::DB()->selectRow('
-				SELECT IFNULL(SUM(t.maxHP * techEff(pt.level) * e.qty), 0) as HP, IFNULL(SUM(t.maxHP * t.shieldPerc * techEff(pt.level) * e.qty), 0) as shield, IFNULL(SUM(t.storEn * techEff(pt.level) * e.qty), 0) as storEn
+			$sum = game::DB()->selectRow('
+				SELECT	IFNULL(SUM(t.maxHP * techEff(pt.level) * e.qty), 0) as HP,
+						IFNULL(SUM(t.storEn * techEff(pt.level) * e.qty), 0) as storEn,
+						IFNULL(SUM(t.signature * e.qty), 0) as signature,
 				FROM ' . playerTech::TABLE_NAME . ' pt
 						INNER JOIN ' . $this::TABLE_NAME_EQUIPMENT . ' e ON pt.idPlayerTech = e.idPlayerTech
 						INNER JOIN ' . tech::TABLE_NAME . ' t on pt.idTech = t.idTech
 				WHERE e.idShipDesign = ?',
 				$this->idShipDesign()
 			);
+			$best = game::DB()->selectRow('
+				SELECT	IFNULL(MAX(t.maxHP * t.shieldPerc * techEff(pt.level) * e.qty), 0) as shieldHP,
+				FROM ' . playerTech::TABLE_NAME . ' pt
+						INNER JOIN ' . $this::TABLE_NAME_EQUIPMENT . ' e ON pt.idPlayerTech = e.idPlayerTech
+						INNER JOIN ' . tech::TABLE_NAME . ' t on pt.idTech = t.idTech
+				WHERE e.idShipDesign = ?',
+				$this->idShipDesign()
+			);
+			$this->summary = array_merge($sum, $best);
 		}
 
 		/**
@@ -214,11 +225,11 @@
 		/**
 		 * @return float
 		 */
-		public function shield() {
+		public function shieldHP() {
 			if(is_null($this->summary)){
 				$this->calcSummary();
 			}
-			return $this->summary['shield'];
+			return $this->summary['shieldHP'];
 		}
 
 		/**

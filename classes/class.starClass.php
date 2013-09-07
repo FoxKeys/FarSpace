@@ -6,7 +6,7 @@
 	 */
 
 	class starClass extends activeRecord {
-		const TABLE_NAME = 'starClasses';
+		const TABLE_NAME = 'star_classes';
 
 		/**
 		 * Stub to prevent starClass() method execution as constructor (old-style constructor)
