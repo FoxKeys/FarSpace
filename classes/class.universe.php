@@ -107,6 +107,7 @@
 							$systemName = array_pop( $systemNamesList );
 							while ( !$acceptable ) {	//ToDo - extremely inefficient...
 								$system = new system( );
+								$system->level( rules::$maxScanPwr );
 								$planets = $this->generateSystem( $system, $systemName );
 								# check requirements
 								foreach ( $planets as $planet ) {
@@ -132,6 +133,7 @@
 					}
 					# generate central black hole
 					$system = new system( );
+					$system->level( rules::$maxScanPwr );
 					$system->x( $galaxy->centerX() );
 					$system->y( $galaxy->centerY() );
 					$system->idStarClass( "b-" );
@@ -160,6 +162,7 @@
 							for ( $j = 0; $j < $galaxyPlayerGroup; $j++ ) {	//for j in range(0, galaxyPlayerGroup):
 								$angle = $aoff + $j * pi() * 2 / $galaxyPlayerGroup;
 								$system = new system( );
+								$system->level( rules::$maxScanPwr );
 								$system->idGalaxy( $galaxy->idGalaxy() );
 								$system->x( $angle * $galaxyTemplate->galaxyGroupDist() + $gx );
 								$system->y( $angle * $galaxyTemplate->galaxyGroupDist() + $gy );

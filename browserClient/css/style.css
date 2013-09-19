@@ -1,3 +1,11 @@
+.left {
+    float: left;
+}
+
+.right {
+    float: right;
+}
+
 fieldset {
     text-align: center;
 }
@@ -70,43 +78,68 @@ fieldset label {
 }
 
 .system-dialog .images .planet {
-    margin: 0 20px 0 0;
+    margin: 0 15px 0 0;
     vertical-align: middle;
     padding: 10px;
 }
 
-.system-dialog .images .planet.selected {
+.system-dialog .structures {
+    height: 101px;
+}
+
+.system-dialog .slot,
+.system-dialog .task
+{
+    border-radius: 3px 3px 3px 3px;
+    background-color: rgba(15, 15, 20, 0.4);
+    box-shadow: 0 0 2px rgba(128, 128, 150, 0.2);
+    padding: 0;
+    margin: 2px 1px;
+    display: block;
+    float: left;
+    width: 37px;
+    height: 37px;
+}
+
+.system-dialog .slot.active,
+.system-dialog .slot:hover,
+.system-dialog .task.active,
+.system-dialog .task:hover {
+    box-shadow: 0 0 4px #4477FF;
+}
+
+.system-dialog .images .planet.active, .system-dialog .images .planet:hover {
     border-radius: 10px;
     box-shadow: inset 0 0 10px #0000AA;
     padding: 10px;
 }
 
 .system-dialog .dataColumn {
-    width: 400px;
-    float: left;
+    width: 399px;
     font-size: 14px;
     font-family: helvetica;
 }
 
 .system-dialog .dataColumn h3 {
     display: inline-block;
-    padding: 2px;
-    margin: 0 0 5px;
-    width: 396px;
+    padding: 2px 0 4px 3px;
+    width: 395px;
     background-image: url("../img/bg-lines.png");
     background-repeat: repeat;
     text-shadow: 1px 1px 1px rgba(125, 125, 125, 0.40);
     font-weight: bold;
     color: #FFFFFF;
+    font-size: 12px;
 }
 
 .system-dialog .dataColumn dl {
     color: #DDDDDD;
     text-shadow: 1px 1px 1px rgba(125, 125, 125, 0.40);
+    font-size: 13px;
 }
 
 .system-dialog .dataColumn dt {
-    width: 130px;
+    width: 129px;
     float: left;
     margin: 5px 0;
 }
@@ -116,4 +149,24 @@ fieldset label {
     float: left;
     text-align: right;
     margin: 5px 4px 5px 0;
+}
+
+span.ajax-overlay {
+    z-index: 999999;
+    position: absolute;
+    display: block;
+    background-color: rgba(255, 112, 147, 0.05);
+    border-radius: 5px;
+}
+
+span.ajax-overlay span.img{
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin-top: -16px;
+    margin-left: -16px;
+    background-image: url("../img/loading.gif");
+    background-repeat: no-repeat;
+    width: 32px;
+    height: 32px;
 }

@@ -6,7 +6,7 @@
  * To change this template use File | Settings | File Templates.
  */
 /*jslint browser: true, devel:true */
-/*global $, browser:true, devel:true, Kinetic, farSpace */
+/*global $, browser:true, devel:true, Kinetic */
 function TPlanetRenderer() {
     "use strict";
     var self = this,
@@ -34,16 +34,16 @@ function TPlanetRenderer() {
                     });
                     //Setup events
                     rect.on('click', function () {
-                        $(document).trigger("planetClick.FS", system, planet);
+                        $(document).trigger("planetClick.FS", [system, planet]);
                     });
                     rect.on('mousemove', function () {
-                        $(document).trigger("planetMove.FS", system, planet);
+                        $(document).trigger("planetMove.FS", [system, planet]);
                     });
                     rect.on('mouseenter', function () {
-                        $(document).trigger("planetEnter.FS", system, planet);
+                        $(document).trigger("planetEnter.FS", [system, planet]);
                     });
                     rect.on('mouseleave', function () {
-                        $(document).trigger("planetLeave.FS", system, planet);
+                        $(document).trigger("planetLeave.FS", [system, planet]);
                     });
                     // add the shape to the layer
                     shapesLayer.add(rect);

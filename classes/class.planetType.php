@@ -21,4 +21,20 @@
 			}
 			return $this->idPlanetType;
 		}
+
+		/**
+		 * @param string $name
+		 * @return string
+		 */
+		public function namePlanetType( $name = null ) {
+			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
+		}
+
+		/**
+		 * alias for namePlanetType
+		 * @return string
+		 */
+		public function name(){
+			return $this->namePlanetType();
+		}
 	}

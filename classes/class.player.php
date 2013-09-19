@@ -10,8 +10,17 @@
 		const TABLE_PLAYERS_TECHS = 'players_techs';
 		private static $defaultStructures = array( 'PWRPLANTNUK1', 'FARM1', 'FARM1', 'FARM1', 'ANCFACTORY', 'ANCFACTORY', 'ANCRESLAB', 'REPAIR1' );
 
-		public function load( $idUniverse ) {
-			throw new Exception( sprintf( fConst::E_NOT_IMPLEMENTED, __METHOD__ ) );
+		/**
+		 * @param int $idPlayer
+		 * @return player
+		 * @throws Exception
+		 */
+		public function load( $idPlayer ) {
+			$data = game::DB()->selectRow( 'SELECT * FROM players WHERE idPlayer = ?', $idPlayer );
+			if ( empty( $data ) ) {
+				throw new Exception( sprintf( fConst::E_NOT_FOUND, __CLASS__, $idPlayer ) );
+			}
+			return $this->assignArray( $data );
 		}
 
 		public function save() {

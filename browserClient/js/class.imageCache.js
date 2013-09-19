@@ -6,7 +6,7 @@
  * To change this template use File | Settings | File Templates.
  */
 /*jslint browser: true, devel:true */
-/*global $, browser:true, devel:true, Kinetic, farSpace */
+/*global $, browser:true, devel:true */
 function TImageCache() {
     "use strict";
     var self = this,

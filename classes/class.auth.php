@@ -67,18 +67,18 @@
 		}
 
 		private function setSSID( $ssid ) {
-			if( setcookie( self::COOKIE_NAME, $ssid, time() + self::SESSION_TIMEOUT, '/', '.' . $_SERVER["HTTP_HOST"], false, true ) ){
+			if ( setcookie( self::COOKIE_NAME, $ssid, time() + self::SESSION_TIMEOUT, '/', '.' . $_SERVER["HTTP_HOST"], false, true ) ) {
 				$this->ssid = $ssid;
 			} else {
 				throw new Exception( 'errorSettingCookie' );
 			};
 		}
 
-		private function getSSID(){
+		private function getSSID() {
 			//
 		}
 
-		public function currentUserId(){
+		public function currentUserId() {
 			//
 		}
 
@@ -101,5 +101,13 @@
 			}
 			return self::$currentUser;
 			*/
+		}
+
+		public function token() {
+			return ''; //ToDo
+		}
+
+		public function tokenPlayer( $idGalaxy ) {
+			return $this->currentUser();//ToDo
 		}
 	}

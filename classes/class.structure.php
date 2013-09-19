@@ -62,6 +62,15 @@
 		 * @param int $value
 		 * @return int
 		 */
+		public function idStructure( $value = null ) {
+			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
+		}
+
+		/**
+		 * Type Hint wrapper
+		 * @param int $value
+		 * @return int
+		 */
 		public function idTech( $value = null ) {
 			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
 		}

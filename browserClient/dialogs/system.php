@@ -8,7 +8,7 @@
 <section id="system-dialog-template" style="display: none">
 	<div class="system-dialog">
 		<span class="images"></span>
-		<div class="dataColumn">
+		<div class="dataColumn left">
 			<div class="planetData">
 				<h3>Planet: <span class="planetName"></span><span class="planetMorale">&nbsp; <?php //ToDo ?></span></h3>
 				<dl>
@@ -33,7 +33,7 @@
 			</div>
 			<div class="systemData"></div>
 		</div>
-		<div class="dataColumn">
+		<div class="dataColumn right">
 			<div class="structures">
 				<h3>Structures</h3>
 			</div>
@@ -64,7 +64,7 @@
 
 			$('.images', $dialog).addClass('starClass' + system.starClass);
 			$.each(system.planets, function (index, sysPlanet) {
-				var $planet = $('<img class="planet" src="img/system/planet_' + sysPlanet.idPlanetType + sysPlanet.idPlanet % planetImgCnt[sysPlanet.idPlanetType] + '.png"/>');
+				var $planet = $('<img class="planet" src="/browserClient/img/system/planet_' + sysPlanet.idPlanetType + sysPlanet.idPlanet % planetImgCnt[sysPlanet.idPlanetType] + '.png"/>');
 				$planet.data('planetInfo', sysPlanet);
 				if (planet && sysPlanet.idPlanet == planet.idPlanet) {
 					$planet.addClass('selected');

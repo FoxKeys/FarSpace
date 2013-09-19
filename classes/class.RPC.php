@@ -11,6 +11,10 @@
 			return game::auth()->login( $login, $password );
 		}
 
+		public function authGetToken(){
+			return 'ToDo - implement';
+		}
+
 		public function universeGetIntroInfo() {
 			$idUniverse = (int)$_REQUEST['idUniverse'];
 			return game::universe()->getIntroInfo( $idUniverse );

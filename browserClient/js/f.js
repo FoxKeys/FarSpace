@@ -27,16 +27,39 @@ function FarSpaceConst() {
 }
 
 /*jslint browser: true, devel:true */
-/*global $, browser:true, devel:true */
+/*global $, browser:true, devel:true, fSettings:true */
 function FarSpace() {
     "use strict";
     /*global f */
     var self = this,
+        f = this,
+        debug = console !== undefined,
+        logId = 0,
         host = document.location.protocol + '//' + document.location.host,
         ajaxURL = host + '/ajax.php',
-        tokens = [];
+        blocksURL = host + '/getBlock.php',
+        tokens = [],
+        modules = {},
+        modulesRegistry = {};
 
     this.FSConst = new FarSpaceConst();
+
+    $.each(fSettings.loadedScripts, function (index, script) {
+        modulesRegistry[index] = $.Deferred().resolve(true);
+    });
+
+    this.registerModule = function (name, module) {
+        modules[name] = module;
+    };
+
+    this.log = function () {
+        if (debug) {
+            var args = Array.prototype.slice.call(arguments),
+                date = new Date();
+            args.unshift(date + '.' + (logId = logId + 1) + ' - ');  //logId - To prevent Firebug log records merging
+            console.log.apply(console, args);
+        }
+    };
 
     this.cInt = function (value) {
         return parseInt(value, 10);
@@ -56,7 +79,7 @@ function FarSpace() {
                 parameters.unshift(token);
                 return self.doAJAX(classMethod, parameters, success);
             }
-            return self.doAJAX('auth.getToken', []).pipe(
+            return self.doAJAX('auth.getToken', {}).pipe(
                 function (token) {
                     parameters.unshift(token);
                     return self.doAJAX(classMethod, parameters, success);
@@ -78,7 +101,7 @@ function FarSpace() {
         $.extend(validateSettings, validateOptions);
         $form.validate(validateSettings);
     };
-
+/* @deprecated
     this.doAJAX = function (URL, data, success) {
         return $.ajax({
             type: 'post',
@@ -114,7 +137,189 @@ function FarSpace() {
                 alert('AJAX error: ' + error.errorMessage);
             }
         );
+    };*/
+    this.ajaxCheck = function (data) {
+        var error = null;
+        if (!data || data.data === undefined || data.result === undefined || data.errorCode === undefined || data.errorMessage === undefined || data.token === undefined) {    //Check packet format
+            error = {errorCode: -1, errorMessage: 'Bad server answer: ' + data};
+        }
+        if (data.token) {
+            tokens.push(data.token);
+        }
+        if (!data.result) {
+            error = {errorCode: data.errorCode, errorMessage: data.errorMessage};
+        }
+        if (error) {
+            $(document).trigger("fAjaxCheckError.f", error);
+            return $.Deferred().reject(error);
+        }
+        return data.data;
     };
+
+    this.ajaxError = function (response) {
+        var error = {errorCode: -1, errorMessage: 'Ajax error: ' + response.status + ' ' + response.statusText};
+        if (response.readyState === 4) {
+            $(document).trigger("fAjaxError.f", error);
+        }
+        return error;
+    };
+
+    this.doAJAX = function (classMethod, parameters) {
+        f.log('doAJAX', $.extend(parameters, {action: classMethod}));
+        return $.ajax({
+            type: 'post',
+            url: ajaxURL,
+            data: $.extend(parameters, {action: classMethod})
+        }).then(
+            self.ajaxCheck,
+            self.ajaxError
+        );
+    };
+
+    this.getToken = function () {
+        var token = tokens.pop();
+        if (token) {
+            return $.Deferred().resolve(token);
+        }
+        return self.doAJAX('authGetToken', {});
+    };
+
+    this.addAjaxOverlay = function ($element) {
+        if ($element.size() > 0) {
+            var $overlay = $('<span class="ajax-overlay"><span class="img"></span></span>');
+
+            $element.data('ajaxOverlay', $overlay);
+
+            $overlay.css({
+                left: $element[0].offsetLeft,
+                top: $element[0].offsetTop,
+                width: $element[0].offsetWidth,
+                height: $element[0].offsetHeight
+            });
+            $($element[0].offsetParent).append($overlay);
+        }
+    };
+
+    this.removeAjaxOverlay = function ($element) {
+        if ($element.size() > 0) {
+            $element.data('ajaxOverlay').remove();
+        }
+    };
+
+    this.load = function (blockName, parameters, $element) {
+        f.addAjaxOverlay($element);
+        return f.getToken().then(
+            function (token) {
+                var $container;
+                if ($element !== undefined && $element.size() > 0) {
+                    $container = $element;
+                } else {
+                    $container = $('<div>');
+                    $('body').append($container);
+                }
+                return $container.load(
+                    blocksURL,
+                    $.param($.extend({token: token, blockName: blockName}, parameters)),//Important, $.param because should be string for GET. GET needed to allow caching
+                    function (response, status, xhr) {
+                        f.removeAjaxOverlay($element);
+                        if (status !== 'success') {
+                            $(document).trigger("fAjaxError.f", {errorCode: -1, errorMessage: 'Ajax error: ' + response.status + ' ' + response.statusText});
+                        }
+                    }
+                );
+            }
+        );
+    };
+
+    this.getScript = function (module, requestParams) {
+        var dfd = $.Deferred(),
+            deps = [];
+
+        if (modulesRegistry[module] === undefined) {
+
+            modulesRegistry[module] = dfd.promise();
+
+            if (fSettings.scripts[module] === undefined) {
+                dfd.reject({errorCode: -1, errorMessage: 'Module "' + module + '" not registered.'});
+            } else {
+                $.each(fSettings.scripts[module], function (index, script) {//Iterate dependencies
+                    deps.push(f.getScript(script, requestParams));
+                });
+
+                $.when.apply($, deps)
+                    .then(function () {
+                        $.ajax(
+                            blocksURL,
+                            {
+                                data: $.extend({blockName: 'JS', module: module}, requestParams),
+                                cache: true,
+                                type: "GET"
+                            }
+                        ).done(function (data, textStatus, jqXHR) {
+                            try {
+                                $('body').append($(data));
+                                dfd.resolve();
+                            } catch (e) {
+                                dfd.reject({errorCode: -1, errorMessage: e.message});
+                            }
+                        }).fail(function (jqxhr, settings, exception) {
+                            dfd.reject({errorCode: jqxhr.status, errorMessage: jqxhr.responseText});
+                        });
+                    })
+                    .fail(function (error) {
+                        dfd.reject(error);
+                    });
+            }
+        }
+        return modulesRegistry[module];
+    };
+
+    this.fCall = function (module, method, methodParams, requestParams) {
+        var context = this,
+            dfd = $.Deferred();
+
+        function doCall(module, method, args) {
+            if (modules[module] !== undefined) {
+                if ($.isFunction(modules[module][method])) {
+                    $.when(modules[module][method].apply(context, (args !== undefined) ? args : []))
+                        .done(function (callResult) {
+                            dfd.resolve(callResult);
+                        })
+                        .fail(function (callResult) {
+                            dfd.reject(callResult);
+                        });
+                } else {
+                    $(document).trigger("fCommonError.f", {errorCode: -1, errorMessage: 'fCall error: method modules.' + module + '.' + method + ' is undefined'});
+                    dfd.reject({errorCode: -1, errorMessage: 'fCall error: method modules.' + module + '.' + method + ' is undefined'});
+                }
+            } else {
+                $(document).trigger("fCommonError.f", [{errorCode: -1, errorMessage: 'fCall error: module modules.' + module + ' is undefined'}, module]);
+                dfd.reject({errorCode: -1, errorMessage: 'fCall error: module modules.' + module + ' is undefined'});
+            }
+        }
+
+        f.getScript(module, requestParams)
+            .done(function () {
+                doCall(module, method, methodParams);
+            })
+            .fail(function (error) {
+                $(document).trigger("fGetScriptFail.f", [error, module]);
+                dfd.reject(error);
+            });
+
+        return dfd.promise();
+    };
+
+
+    $(document).on("fAjaxCheckError.f fAjaxError.f fCommonError.f fGetScriptFail.f", function (event, error, module) {
+        f.log(event.type, event, error);
+        if (module === undefined || module !== 'f.messages') {
+            f.fCall('f.messages', 'alert', [event.type + ': ' + error.errorMessage], {});
+        } else {
+            alert(event.type + ': ' + error.errorMessage);
+        }
+    });
+
 }
 
 //Global FarSpace object

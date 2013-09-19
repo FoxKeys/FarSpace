@@ -4,6 +4,19 @@
 	 * Author: Fox foxkeys@gmail.com
 	 * Date Time: 10.02.2013 7:33
 	 */
+	//Register core scripts
+	JS::registerJS( config::$coreJSArray );
+	JS::addToHeader('kinetic');
+	JS::addToHeader('jquery.ui');
+	JS::addToHeader('jquery.mousewheel');
+	JS::addToHeader('f');
+	JS::addToHeader('f.messages');
+	JS::addToHeader('f.imageCache');
+	JS::addToHeader('f.grid');
+	JS::addToHeader('f.scanner');
+	JS::addToHeader('f.planetRenderer');
+	JS::addToHeader('f.systemRenderer');
+	JS::addToHeader('f.system');
 ?>
 <!doctype html>
 <html lang="en">
@@ -12,26 +25,10 @@
     <title>FarSpace 0.1</title>
     <meta name="description" content="The FarSpace game">
     <meta name="author" content="Sycoder">
-	<link rel="stylesheet" href="css/reset.css">
-    <link rel="stylesheet" href="css/style.css">
-	<link rel="stylesheet" href="css/redmond/jquery-ui-1.10.0.custom.css">
-    <!--[if lt IE 9]>
-	<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
+	<link rel="stylesheet" href="/browserClient/css/reset.css">
+    <link rel="stylesheet" href="/browserClient/css/style.css">
+	<link rel="stylesheet" href="/browserClient/css/redmond/jquery-ui-1.10.0.custom.css">
 
-	<script src="js/jquery-1.9.0.js"></script>
-	<script src="js/jquery-ui.js"></script>
-	<script src="js/jquery.validate.js"></script>
-	<script src="js/jquery.form.js"></script>
-	<script src="js/jquery.mousewheel-3.1.1.js"></script>
-	<script src="js/kinetic-v4.3.3.js"></script>
-	<script src="js/f.js"></script>
-	<script src="js/class.imageCache.js"></script>
-	<script src="js/class.grid.js"></script>
-	<script src="js/class.scanner.js"></script>
-	<script src="js/class.planetRenderer.js"></script>
-	<script src="js/class.systemRenderer.js"></script>
-	<!--<script src="js/main.js"></script>-->
 	<style>
 
 		#container {
@@ -56,6 +53,17 @@
 			line-height: 1.2;
 		}
 	</style>
+	<?=JS::getSettings()?>
+	<?=JS::getHeaderScripts(); ?>
+
+	<!--[if lt IE 9]>
+	<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	 <![endif]-->
+<?php /*
+	<script src="js/jquery.validate.js"></script>
+	<script src="js/jquery.form.js"></script>
+	<!--<script src="js/main.js"></script>-->
+	*/ ?>
 </head>
 <body id="farSpace">
 	<?php //require_once( 'dialogs/login.php' );?>
@@ -133,6 +141,7 @@
                 scale = Math.max(MIN_SCALE, scale);
                 scale = Math.min(scale, MAX_SCALE);
                 paint();
+				return false;
             });
 
             function cInt(value) {
@@ -279,24 +288,24 @@
 					//Preload images
 					$.each(systems, function (index, system) {
 						system.icons = [];
-						system.image = imageCache.get('img/systems/star_' + system.starClass + '.png');
+						system.image = imageCache.get('/browserClient/img/systems/star_' + system.starClass + '.png');
 						if (system.refuelMax > 0) {
 							if (system.refuelMax >= 87) {
-								system.icons.push(imageCache.get('img/icons/fuel_99.png'));
+								system.icons.push(imageCache.get('/browserClient/img/icons/fuel_99.png'));
 							} else if (system.refuelMax >= 62) {
-								system.icons.push(imageCache.get('img/icons/fuel_75.png'));
+								system.icons.push(imageCache.get('/browserClient/img/icons/fuel_75.png'));
 							} else if (system.refuelMax >= 37) {
-								system.icons.push(imageCache.get('img/icons/fuel_50.png'));
+								system.icons.push(imageCache.get('/browserClient/img/icons/fuel_50.png'));
 							} else if (system.refuelMax >= 12) {
-								system.icons.push(imageCache.get('img/icons/fuel_25.png'));
+								system.icons.push(imageCache.get('/browserClient/img/icons/fuel_25.png'));
 							}
 						} else if (system.hasRefuel) {
-							system.icons.push(imageCache.get('img/icons/fuel_-.png'));
+							system.icons.push(imageCache.get('/browserClient/img/icons/fuel_-.png'));
 						}
 						if (system.planets) {
 							$.each(system.planets, function (index, planet) {
 								if (planet.idStratRes) {
-									system.icons.push(imageCache.get('img/icons/sr_' + planet.idStratRes + '.png'));
+									system.icons.push(imageCache.get('/browserClient/img/icons/sr_' + planet.idStratRes + '.png'));
 								}
 							});
 						}
@@ -336,17 +345,20 @@
 			});
 
 			$(document).on('systemClick.FS', function (event, system) {
-				console.log(system);
-				$(document).trigger("show.systemDialog.FS", system, null );
+				//console.log(system);
+				farSpace.fCall('f.system', 'show', [system.idSystem], {});
+				//$(document).trigger("show.systemDialog.FS", system, null );
 			});
 
 			$(document).on('planetClick.FS', function (event, system, planet) {
-				console.log(system, planet);
-				$(document).trigger("show.systemDialog.FS", system, planet );
+				//console.log(system, planet);
+				farSpace.fCall('f.system', 'show', [system.idSystem, planet.idPlanet], {});
+				//$(document).trigger("show.systemDialog.FS", [system, planet] );
 			});
 		});
 
 
 	</script>
+	<?=JS::getFooterScripts(); ?>
 </body>
 </html>

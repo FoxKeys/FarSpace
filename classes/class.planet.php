@@ -275,7 +275,7 @@
 		 * @param int $value
 		 * @return float
 		 */
-		public function morale( $value = null ) {
+		public function morale( $value = null ) {//ToDo - level mod
 			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
 		}
 
@@ -285,6 +285,24 @@
 		 * @return string
 		 */
 		public function name( $value = null ) {
+			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
+		}
+
+		/**
+		 * Type Hint wrapper
+		 * @param float $level
+		 * @return float
+		 */
+		public function level( $level = null ) {
+			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
+		}
+
+		/**
+		 * Type Hint wrapper
+		 * @param int $value
+		 * @return int
+		 */
+		public function plBio( $value = null ) {
 			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
 		}
 	}

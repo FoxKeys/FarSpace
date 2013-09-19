@@ -8,12 +8,15 @@
 
 	try {
 		if ( !empty( $_GET['blockName'] ) ){
-			core::initGetBlock();
 
-			$blockName = preg_replace( core::FILE_NAME_REGEX, '', $_GET['blockName'] );
+			$blockName = preg_replace( config::FILE_NAME_REGEX, '', $_GET['blockName'] );
+
+			if ( !method_exists( game::ajaxBlocks(), $blockName ) ){
+				throw new Exception( sprintf( t::__( 'Ajax block "%s" not found in game::ajaxBlocks()' ), $blockName ) );
+			}
 
 			ob_start();
-			ajaxBlocks::$blockName();
+			game::ajaxBlocks()->$blockName();
 			$content = ob_get_contents();
 			ob_clean();
 
@@ -31,6 +34,6 @@
 		}
 	} catch ( Exception $e ) {
 		if ( config::DEBUG_MODE ) {
-			echo $e->getMessage();
+			echo e::html( $e->getMessage() );
 		}
 	}

@@ -37,12 +37,17 @@
 
 		/**
 		 *
+		 * @param int $idPlayer
 		 * @param int $idSystem
 		 * @throws Exception
 		 * @return system
 		 */
-		public function load( $idSystem ) {
-			throw new Exception( sprintf( fConst::E_NOT_IMPLEMENTED, __METHOD__ ) );
+		public function load( $idPlayer, $idSystem ) {
+			$data = game::DB()->selectRow( 'SELECT s.*, sm.level FROM ' . system::TABLE_NAME . ' s INNER JOIN ' . scanner::TABLE_NAME_STATIC_MAP . ' sm ON s.idSystem = sm.idSystem  WHERE s.idSystem = ? AND sm.IdPlayer = ?', $idSystem, $idPlayer );
+			if ( empty( $data ) ) {
+				throw new Exception( sprintf( fConst::E_NOT_FOUND, __CLASS__, $idSystem ) );
+			}
+			return $this->assignArray( $data );
 		}
 
 		/**
@@ -102,9 +107,23 @@
 		/**
 		 * Type Hint wrapper
 		 * @param string $value
-		 * @return string
+		 * @return string|null
 		 */
 		public function name( $value = null ) {
+			if ( func_num_args() > 0 || $this->level() >= rules::$level2InfoScanPwr ) {
+				return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
+			} else {
+				return null;
+			}
+		}
+
+		/**
+		 * Type Hint wrapper
+		 * @param float $level
+		 * @return float
+		 */
+		public function level( $level = null ) {
 			return call_user_func_array( array( $this, 'fieldGetSet' ), array( 1 => __METHOD__ ) + func_get_args() );
 		}
+
 	}
